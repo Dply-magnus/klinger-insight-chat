@@ -4,6 +4,12 @@ import { ChatInput } from "./ChatInput";
 import { ChatHeader } from "./ChatHeader";
 import { ImagePanel } from "./ImagePanel";
 import { cn } from "@/lib/utils";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface Message {
   id: string;
@@ -82,10 +88,19 @@ const dummyMessages: Message[] = [
 export function KlingerChat() {
   const [messages, setMessages] = useState<Message[]>(dummyMessages);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>("4");
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selectedMessage = messages.find((m) => m.id === selectedMessageId);
   const selectedImages = selectedMessage?.images || [];
+
+  const handleMessageClick = (message: Message) => {
+    if (message.images?.length) {
+      setSelectedMessageId(message.id);
+      // Open drawer on mobile
+      setMobileDrawerOpen(true);
+    }
+  };
 
   const handleSendMessage = (content: string) => {
     const newUserMessage: Message = {
@@ -132,7 +147,7 @@ export function KlingerChat() {
                   role={message.role}
                   content={message.content}
                   isSelected={message.id === selectedMessageId}
-                  onClick={() => message.images?.length ? setSelectedMessageId(message.id) : null}
+                  onClick={() => handleMessageClick(message)}
                   hasImages={!!message.images?.length}
                 />
               </div>
@@ -144,10 +159,20 @@ export function KlingerChat() {
         <ChatInput onSend={handleSendMessage} />
       </main>
 
-      {/* Right: Image Panel */}
+      {/* Right: Image Panel - Desktop */}
       <aside className="w-[380px] flex-shrink-0 bg-panel border-l border-sidebar-border hidden lg:flex flex-col">
         <ImagePanel images={selectedImages} selectedMessageId={selectedMessageId || undefined} />
       </aside>
+
+      {/* Mobile: Image Drawer */}
+      <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
+        <SheetContent side="bottom" className="h-[85vh] bg-panel border-t border-sidebar-border p-0 lg:hidden">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Dokumentation</SheetTitle>
+          </SheetHeader>
+          <ImagePanel images={selectedImages} selectedMessageId={selectedMessageId || undefined} />
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
