@@ -112,12 +112,7 @@ export function KlingerChat() {
 
   return (
     <div className="h-screen flex bg-background">
-      {/* Left: Image Panel */}
-      <aside className="w-[380px] flex-shrink-0 bg-panel border-r border-sidebar-border hidden lg:flex flex-col">
-        <ImagePanel images={selectedImages} selectedMessageId={selectedMessageId || undefined} />
-      </aside>
-
-      {/* Right: Chat */}
+      {/* Left: Chat */}
       <main className="flex-1 flex flex-col min-w-0">
         <ChatHeader />
         
@@ -148,6 +143,11 @@ export function KlingerChat() {
 
         <ChatInput onSend={handleSendMessage} />
       </main>
+
+      {/* Right: Image Panel */}
+      <aside className="w-[380px] flex-shrink-0 bg-panel border-l border-sidebar-border hidden lg:flex flex-col">
+        <ImagePanel images={selectedImages} selectedMessageId={selectedMessageId || undefined} />
+      </aside>
     </div>
   );
 }
