@@ -1,4 +1,4 @@
-import { FileText, Calendar, Hash, Layers, Folder } from "lucide-react";
+import { FileText, Calendar, Layers, Folder } from "lucide-react";
 import { Document, formatDate, CategoryNode } from "@/lib/documentTypes";
 import { StatusBadge } from "./StatusBadge";
 import { VersionHistory } from "./VersionHistory";
@@ -76,13 +76,6 @@ export function DocumentPreviewPanel({
           <span className="text-panel-muted">Uppladdad:</span>
           <span className="text-panel-foreground">
             {formatDate(document.currentVersion.uploadedAt)}
-          </span>
-        </div>
-        <div className="flex items-center gap-3 text-sm">
-          <Hash className="w-4 h-4 text-panel-muted" />
-          <span className="text-panel-muted">Skapad:</span>
-          <span className="text-panel-foreground">
-            {formatDate(document.createdAt)}
           </span>
         </div>
         <div className="flex items-center gap-3 text-sm">
