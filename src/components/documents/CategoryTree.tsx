@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronRight, Folder, FolderOpen, FileStack, HelpCircle, FileText, Plus, Pencil, Trash2, MoreHorizontal, FolderPlus } from "lucide-react";
+import { ChevronRight, Folder, FolderOpen, FileStack, HelpCircle, FileText, Plus, Pencil, Trash2, MoreHorizontal, FolderPlus, X } from "lucide-react";
 import { CategoryNode, Document, getFileExtension } from "@/lib/documentTypes";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -140,6 +140,17 @@ export function CategoryTree({
               disabled={!newCategoryName.trim()}
             >
               <Plus className="w-3 h-3" />
+            </Button>
+            <Button 
+              size="icon" 
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => {
+                setIsCreating(false);
+                setNewCategoryName("");
+              }}
+            >
+              <X className="w-3 h-3" />
             </Button>
           </div>
         )}
@@ -522,6 +533,17 @@ function CategoryItem({
               disabled={!newSubfolderName.trim()}
             >
               <Plus className="w-3 h-3" />
+            </Button>
+            <Button 
+              size="icon" 
+              variant="ghost"
+              className="h-7 w-7"
+              onClick={() => {
+                setIsAddingSubfolder(false);
+                setNewSubfolderName("");
+              }}
+            >
+              <X className="w-3 h-3" />
             </Button>
           </div>
         )}
