@@ -11,6 +11,7 @@ export interface Document {
   id: string;
   title: string;
   filename: string;
+  category?: string; // Path-based: "Produkter/Ventiler/Kulventiler"
   currentVersion: DocumentVersion;
   versions: DocumentVersion[];
   createdAt: Date;
@@ -19,8 +20,16 @@ export interface Document {
 export interface StagedFile {
   file: File;
   title: string;
+  category?: string;
   isReplacement: boolean;
   existingDocumentId?: string;
+}
+
+export interface CategoryNode {
+  name: string;
+  path: string;
+  children: CategoryNode[];
+  documentCount: number;
 }
 
 export function generateTitleFromFilename(filename: string): string {
@@ -41,4 +50,67 @@ export function formatDate(date: Date): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+export function getFileExtension(filename: string): string {
+  const match = filename.match(/\.([^/.]+)$/);
+  return match ? match[1].toLowerCase() : "";
+}
+
+export function parseCategories(documents: Document[]): CategoryNode[] {
+  const categoryMap = new Map<string, CategoryNode>();
+
+  documents.forEach((doc) => {
+    if (!doc.category) return;
+
+    const segments = doc.category.split("/");
+    let currentPath = "";
+
+    segments.forEach((segment, index) => {
+      const parentPath = currentPath;
+      currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+
+      if (!categoryMap.has(currentPath)) {
+        categoryMap.set(currentPath, {
+          name: segment,
+          path: currentPath,
+          children: [],
+          documentCount: 0,
+        });
+
+        // Add to parent's children
+        if (parentPath && categoryMap.has(parentPath)) {
+          const parent = categoryMap.get(parentPath)!;
+          if (!parent.children.find((c) => c.path === currentPath)) {
+            parent.children.push(categoryMap.get(currentPath)!);
+          }
+        }
+      }
+
+      // Increment document count for this path and all parents
+      if (index === segments.length - 1) {
+        let path = currentPath;
+        while (path) {
+          const node = categoryMap.get(path);
+          if (node) node.documentCount++;
+          const lastSlash = path.lastIndexOf("/");
+          path = lastSlash > 0 ? path.substring(0, lastSlash) : "";
+        }
+      }
+    });
+  });
+
+  // Return only root-level categories
+  return Array.from(categoryMap.values()).filter(
+    (cat) => !cat.path.includes("/")
+  );
+}
+
+export function getUniqueExtensions(documents: Document[]): string[] {
+  const extensions = new Set<string>();
+  documents.forEach((doc) => {
+    const ext = getFileExtension(doc.filename);
+    if (ext) extensions.add(ext);
+  });
+  return Array.from(extensions).sort();
 }
