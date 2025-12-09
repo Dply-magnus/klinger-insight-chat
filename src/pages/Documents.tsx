@@ -6,6 +6,7 @@ import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
 import { UploadPreview } from "@/components/documents/UploadPreview";
 import { DocumentPreviewPanel } from "@/components/documents/DocumentPreviewPanel";
 import { CategoryTree } from "@/components/documents/CategoryTree";
+import { CategoryBreadcrumb } from "@/components/documents/CategoryBreadcrumb";
 import { dummyDocuments } from "@/lib/dummyDocuments";
 import {
   Document,
@@ -46,6 +47,7 @@ export default function Documents() {
   const [documents, setDocuments] = useState<Document[]>(dummyDocuments);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
+  const [mobileCategoryDrawerOpen, setMobileCategoryDrawerOpen] = useState(false);
 
   // Filters and sorting
   const [searchQuery, setSearchQuery] = useState("");
@@ -479,6 +481,16 @@ export default function Documents() {
             icon={<FileText className="w-5 h-5 text-primary" />}
           />
 
+          {/* Category breadcrumb trigger for mobile */}
+          <div className="px-4 py-2 border-b border-border bg-card">
+            <CategoryBreadcrumb
+              category={selectedCategory}
+              onNavigate={setSelectedCategory}
+              compact
+              onClick={() => setMobileCategoryDrawerOpen(true)}
+            />
+          </div>
+
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Upload zone */}
             <div className="p-4 border-b border-border">
@@ -529,6 +541,37 @@ export default function Documents() {
           </div>
         </main>
       </div>
+
+      {/* Mobile: Category Tree Drawer */}
+      <Sheet open={mobileCategoryDrawerOpen} onOpenChange={setMobileCategoryDrawerOpen}>
+        <SheetContent
+          side="left"
+          className="w-[85vw] max-w-[320px] bg-card border-r border-border p-0 lg:hidden"
+        >
+          <SheetHeader className="sr-only">
+            <SheetTitle>Kategorier</SheetTitle>
+          </SheetHeader>
+          <CategoryTree
+            categories={categories}
+            documents={documents}
+            selectedCategory={selectedCategory}
+            selectedDocumentId={selectedDocumentId}
+            onSelectCategory={(cat) => {
+              setSelectedCategory(cat);
+              setMobileCategoryDrawerOpen(false);
+            }}
+            onSelectDocument={(id) => {
+              handleSelectDocument(id);
+              setMobileCategoryDrawerOpen(false);
+            }}
+            onCreateCategory={handleCreateCategory}
+            onRenameCategory={handleRenameCategory}
+            onDeleteCategory={handleDeleteCategory}
+            totalCount={documents.length}
+            uncategorizedCount={uncategorizedCount}
+          />
+        </SheetContent>
+      </Sheet>
 
       {/* Mobile: Preview Drawer */}
       <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>
