@@ -93,6 +93,73 @@ export default function Documents() {
     setShowDeleted(false);
   };
 
+  // Category management
+  const handleCreateCategory = (parentPath: string | null, name: string) => {
+    const newPath = parentPath ? `${parentPath}/${name}` : name;
+    // Create a placeholder document to establish the category
+    // In a real app, categories would be stored separately
+    // For now, we just need to ensure the category path exists
+    // The category will appear when documents are assigned to it
+    toast({
+      title: "Mapp skapad",
+      description: `Mappen "${name}" har skapats${parentPath ? ` under "${parentPath.split('/').pop()}"` : ""}.`,
+    });
+    // Select the new category
+    setSelectedCategory(newPath);
+  };
+
+  const handleRenameCategory = (oldPath: string, newName: string) => {
+    const pathParts = oldPath.split('/');
+    pathParts[pathParts.length - 1] = newName;
+    const newPath = pathParts.join('/');
+    
+    // Update all documents that have this category or are in subcategories
+    setDocuments((prev) =>
+      prev.map((doc) => {
+        if (!doc.category) return doc;
+        if (doc.category === oldPath) {
+          return { ...doc, category: newPath };
+        }
+        if (doc.category.startsWith(oldPath + '/')) {
+          return { ...doc, category: doc.category.replace(oldPath, newPath) };
+        }
+        return doc;
+      })
+    );
+    
+    // Update selected category if it was the renamed one
+    if (selectedCategory === oldPath) {
+      setSelectedCategory(newPath);
+    } else if (selectedCategory?.startsWith(oldPath + '/')) {
+      setSelectedCategory(selectedCategory.replace(oldPath, newPath));
+    }
+    
+    toast({ title: "Mapp omdöpt", description: `Mappen heter nu "${newName}".` });
+  };
+
+  const handleDeleteCategory = (path: string) => {
+    // Remove category from all documents in this category and subcategories
+    setDocuments((prev) =>
+      prev.map((doc) => {
+        if (!doc.category) return doc;
+        if (doc.category === path || doc.category.startsWith(path + '/')) {
+          return { ...doc, category: undefined };
+        }
+        return doc;
+      })
+    );
+    
+    // Clear selected category if it was the deleted one
+    if (selectedCategory === path || selectedCategory?.startsWith(path + '/')) {
+      setSelectedCategory(null);
+    }
+    
+    toast({
+      title: "Mapp borttagen",
+      description: "Filerna i mappen är nu okategoriserade.",
+    });
+  };
+
   const handleFilesSelected = (files: File[]) => {
     const staged: StagedFile[] = files.map((file) => {
       const existingDoc = documents.find(
@@ -313,6 +380,9 @@ export default function Documents() {
                 selectedDocumentId={selectedDocumentId}
                 onSelectCategory={setSelectedCategory}
                 onSelectDocument={handleSelectDocument}
+                onCreateCategory={handleCreateCategory}
+                onRenameCategory={handleRenameCategory}
+                onDeleteCategory={handleDeleteCategory}
                 totalCount={documents.length}
                 uncategorizedCount={uncategorizedCount}
               />
