@@ -288,7 +288,7 @@ export default function Documents() {
   return (
     <div className="h-screen flex bg-background">
       {/* Left: Category tree - Desktop only */}
-      <aside className="w-[220px] flex-shrink-0 bg-sidebar-background border-r border-sidebar-border hidden lg:flex flex-col">
+      <aside className="w-[220px] flex-shrink-0 bg-card border-r border-border hidden lg:flex flex-col">
         <CategoryTree
           categories={categories}
           selectedCategory={selectedCategory}

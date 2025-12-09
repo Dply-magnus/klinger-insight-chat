@@ -19,9 +19,9 @@ export function CategoryTree({
   uncategorizedCount,
 }: CategoryTreeProps) {
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-3 border-b border-sidebar-border">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60">
+    <div className="flex flex-col h-full bg-card">
+      <div className="p-3 border-b border-border">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Kategorier
         </h3>
       </div>
@@ -33,13 +33,16 @@ export function CategoryTree({
           className={cn(
             "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
             selectedCategory === null
-              ? "bg-sidebar-accent text-sidebar-accent-foreground"
-              : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50"
+              ? "bg-primary text-primary-foreground"
+              : "text-foreground hover:bg-muted"
           )}
         >
           <FileStack className="w-4 h-4" />
           <span className="flex-1 text-left">Alla dokument</span>
-          <span className="text-xs text-sidebar-foreground/50">{totalCount}</span>
+          <span className={cn(
+            "text-xs",
+            selectedCategory === null ? "text-primary-foreground/70" : "text-muted-foreground"
+          )}>{totalCount}</span>
         </button>
 
         {/* Category tree */}
@@ -60,13 +63,16 @@ export function CategoryTree({
             className={cn(
               "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors mt-2",
               selectedCategory === "__uncategorized__"
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted"
             )}
           >
             <HelpCircle className="w-4 h-4" />
             <span className="flex-1 text-left">Okategoriserade</span>
-            <span className="text-xs text-sidebar-foreground/50">{uncategorizedCount}</span>
+            <span className={cn(
+              "text-xs",
+              selectedCategory === "__uncategorized__" ? "text-primary-foreground/70" : "text-muted-foreground"
+            )}>{uncategorizedCount}</span>
           </button>
         )}
       </div>
@@ -113,17 +119,17 @@ function CategoryItem({
         className={cn(
           "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
           isSelected
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            ? "bg-primary text-primary-foreground"
             : isParentOfSelected
-            ? "text-sidebar-foreground"
-            : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50"
+            ? "text-foreground font-medium"
+            : "text-foreground hover:bg-muted"
         )}
         style={{ paddingLeft: `${12 + level * 16}px` }}
       >
         {hasChildren ? (
           <button
             onClick={handleToggle}
-            className="p-0.5 -ml-1 hover:bg-sidebar-accent rounded"
+            className="p-0.5 -ml-1 hover:bg-muted rounded"
           >
             <ChevronRight
               className={cn(
@@ -139,11 +145,17 @@ function CategoryItem({
         {isExpanded ? (
           <FolderOpen className="w-4 h-4 text-primary" />
         ) : (
-          <Folder className="w-4 h-4 text-sidebar-foreground/60" />
+          <Folder className={cn(
+            "w-4 h-4",
+            isSelected ? "text-primary-foreground" : "text-muted-foreground"
+          )} />
         )}
         
         <span className="flex-1 text-left truncate">{category.name}</span>
-        <span className="text-xs text-sidebar-foreground/50">
+        <span className={cn(
+          "text-xs",
+          isSelected ? "text-primary-foreground/70" : "text-muted-foreground"
+        )}>
           {category.documentCount}
         </span>
       </button>
