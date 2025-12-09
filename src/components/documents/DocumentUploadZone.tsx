@@ -23,9 +23,7 @@ export function DocumentUploadZone({ onFilesSelected }: DocumentUploadZoneProps)
     e.preventDefault();
     setIsDragging(false);
     
-    const files = Array.from(e.dataTransfer.files).filter(
-      (file) => file.type === "application/pdf"
-    );
+    const files = Array.from(e.dataTransfer.files);
     
     if (files.length > 0) {
       onFilesSelected(files);
@@ -55,7 +53,7 @@ export function DocumentUploadZone({ onFilesSelected }: DocumentUploadZoneProps)
     >
       <input
         type="file"
-        accept=".pdf"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.json,.xml"
         multiple
         onChange={handleFileInput}
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -75,10 +73,10 @@ export function DocumentUploadZone({ onFilesSelected }: DocumentUploadZoneProps)
         
         <div>
           <p className="font-medium text-foreground">
-            {isDragging ? "Släpp för att ladda upp" : "Dra och släpp PDF-filer här"}
+            {isDragging ? "Släpp för att ladda upp" : "Dra och släpp filer här"}
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            eller klicka för att välja filer
+            PDF, Word, Excel, PowerPoint, TXT, CSV, JSON, XML
           </p>
         </div>
       </div>
