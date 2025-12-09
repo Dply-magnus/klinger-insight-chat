@@ -288,11 +288,14 @@ export default function Documents() {
   return (
     <div className="h-screen flex bg-background">
       {/* Left: Category tree - Desktop only */}
-      <aside className="w-[220px] flex-shrink-0 bg-card border-r border-border hidden lg:flex flex-col">
+      <aside className="w-[240px] flex-shrink-0 bg-card border-r border-border hidden lg:flex flex-col">
         <CategoryTree
           categories={categories}
+          documents={documents}
           selectedCategory={selectedCategory}
+          selectedDocumentId={selectedDocumentId}
           onSelectCategory={setSelectedCategory}
+          onSelectDocument={handleSelectDocument}
           totalCount={documents.length}
           uncategorizedCount={uncategorizedCount}
         />
