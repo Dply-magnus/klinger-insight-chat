@@ -91,6 +91,7 @@ export default function Documents() {
     setStatusFilter("all");
     setExtensionFilter("all");
     setShowDeleted(false);
+    setSelectedCategory(null); // Reset to "Alla dokument"
   };
 
   // Category management

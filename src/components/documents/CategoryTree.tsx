@@ -92,36 +92,6 @@ export function CategoryTree({
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
-        {/* New category input */}
-        {isCreating && (
-          <div className="mb-2 p-2 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-2">
-              {selectedCategory && selectedCategory !== "__uncategorized__" 
-                ? `Ny mapp i "${selectedCategory.split('/').pop()}"` 
-                : "Ny mapp på rotnivå"}
-            </p>
-            <div className="flex gap-2">
-              <Input
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Mappnamn..."
-                className="h-8 text-sm"
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleCreateCategory();
-                  if (e.key === "Escape") {
-                    setIsCreating(false);
-                    setNewCategoryName("");
-                  }
-                }}
-              />
-              <Button size="sm" className="h-8" onClick={handleCreateCategory}>
-                <Plus className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* All documents */}
         <button
           onClick={() => onSelectCategory(null)}
@@ -140,6 +110,40 @@ export function CategoryTree({
           )}>{totalCount}</span>
         </button>
 
+        {/* New root category input */}
+        {isCreating && (
+          <div className="flex items-center gap-2 mt-2 mb-1 px-3">
+            <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <Input
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              placeholder="Ny mapp..."
+              className="h-7 text-xs flex-1"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleCreateCategory();
+                if (e.key === "Escape") {
+                  setIsCreating(false);
+                  setNewCategoryName("");
+                }
+              }}
+              onBlur={() => {
+                if (!newCategoryName.trim()) {
+                  setIsCreating(false);
+                }
+              }}
+            />
+            <Button 
+              size="icon" 
+              className="h-7 w-7" 
+              onClick={handleCreateCategory}
+              disabled={!newCategoryName.trim()}
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
+
         {/* Category tree */}
         {categories.map((category) => (
           <CategoryItem
@@ -150,6 +154,7 @@ export function CategoryTree({
             selectedDocumentId={selectedDocumentId}
             onSelectCategory={onSelectCategory}
             onSelectDocument={onSelectDocument}
+            onCreateCategory={onCreateCategory}
             onRenameCategory={onRenameCategory}
             onDeleteCategory={onDeleteCategory}
             level={0}
@@ -252,6 +257,7 @@ interface CategoryItemProps {
   selectedDocumentId: string | null;
   onSelectCategory: (path: string | null) => void;
   onSelectDocument: (id: string) => void;
+  onCreateCategory: (parentPath: string | null, name: string) => void;
   onRenameCategory: (oldPath: string, newName: string) => void;
   onDeleteCategory: (path: string) => void;
   level: number;
@@ -264,6 +270,7 @@ function CategoryItem({
   selectedDocumentId,
   onSelectCategory,
   onSelectDocument,
+  onCreateCategory,
   onRenameCategory,
   onDeleteCategory,
   level,
@@ -274,6 +281,8 @@ function CategoryItem({
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(category.name);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isAddingSubfolder, setIsAddingSubfolder] = useState(false);
+  const [newSubfolderName, setNewSubfolderName] = useState("");
   
   const hasChildren = category.children.length > 0;
   const isSelected = selectedCategory === category.path;
@@ -307,6 +316,15 @@ function CategoryItem({
   const handleDelete = () => {
     onDeleteCategory(category.path);
     setShowDeleteConfirm(false);
+  };
+
+  const handleAddSubfolder = () => {
+    if (newSubfolderName.trim()) {
+      onCreateCategory(category.path, newSubfolderName.trim());
+      setNewSubfolderName("");
+      setIsAddingSubfolder(false);
+      setIsExpanded(true);
+    }
   };
 
   return (
@@ -407,6 +425,23 @@ function CategoryItem({
             {category.documentCount}
           </span>
 
+          {/* Add subfolder button */}
+          <span
+            role="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsAddingSubfolder(true);
+              setIsExpanded(true);
+            }}
+            className={cn(
+              "p-1 rounded hover:bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer",
+              isSelected && "hover:bg-primary-foreground/20"
+            )}
+            title="Lägg till undermapp"
+          >
+            <Plus className="w-3 h-3" />
+          </span>
+
           {/* Context menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -422,6 +457,16 @@ function CategoryItem({
               </span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem 
+                onClick={() => {
+                  setIsAddingSubfolder(true);
+                  setIsExpanded(true);
+                }} 
+                className="gap-2"
+              >
+                <FolderPlus className="w-4 h-4" />
+                Lägg till undermapp
+              </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => {
                   setRenameValue(category.name);
@@ -444,6 +489,43 @@ function CategoryItem({
           </DropdownMenu>
         </div>
 
+        {/* Inline subfolder creation */}
+        {isAddingSubfolder && (
+          <div 
+            className="flex items-center gap-2 mt-1 mb-1"
+            style={{ paddingLeft: `${28 + level * 16}px` }}
+          >
+            <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            <Input
+              value={newSubfolderName}
+              onChange={(e) => setNewSubfolderName(e.target.value)}
+              placeholder="Mappnamn..."
+              className="h-7 text-xs flex-1"
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddSubfolder();
+                if (e.key === "Escape") {
+                  setIsAddingSubfolder(false);
+                  setNewSubfolderName("");
+                }
+              }}
+              onBlur={() => {
+                if (!newSubfolderName.trim()) {
+                  setIsAddingSubfolder(false);
+                }
+              }}
+            />
+            <Button 
+              size="icon" 
+              className="h-7 w-7" 
+              onClick={handleAddSubfolder}
+              disabled={!newSubfolderName.trim()}
+            >
+              <Plus className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
+
         {isExpanded && (
           <div>
             {/* Subcategories */}
@@ -456,6 +538,7 @@ function CategoryItem({
                 selectedDocumentId={selectedDocumentId}
                 onSelectCategory={onSelectCategory}
                 onSelectDocument={onSelectDocument}
+                onCreateCategory={onCreateCategory}
                 onRenameCategory={onRenameCategory}
                 onDeleteCategory={onDeleteCategory}
                 level={level + 1}

@@ -187,29 +187,28 @@ export function DocumentList({
             onChange={onExtensionFilterChange}
           />
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Checkbox 
                 id="show-deleted" 
                 checked={showDeleted}
                 onCheckedChange={(checked) => onShowDeletedChange(!!checked)}
+                className="rounded"
               />
               <Label htmlFor="show-deleted" className="text-xs text-muted-foreground cursor-pointer">
                 Visa raderade
               </Label>
             </div>
             
-            {hasActiveFilters && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onClearFilters}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-3 h-3 mr-1" />
-                Rensa
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onClearFilters}
+              className="h-7 px-3 text-xs"
+            >
+              <X className="w-3 h-3 mr-1" />
+              Rensa filter
+            </Button>
           </div>
         </div>
       </div>
