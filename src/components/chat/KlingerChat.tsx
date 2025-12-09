@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
+import { Bot } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
-import { ChatHeader } from "./ChatHeader";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { ImagePanel } from "./ImagePanel";
 import { cn } from "@/lib/utils";
 import {
@@ -129,7 +130,11 @@ export function KlingerChat() {
     <div className="h-screen flex bg-background">
       {/* Left: Chat */}
       <main className="flex-1 flex flex-col min-w-0">
-        <ChatHeader />
+        <PageHeader
+          title="KLINGER Produktassistent"
+          subtitle="Online"
+          icon={<Bot className="w-5 h-5 text-primary" />}
+        />
         
         {/* Messages */}
         <div className="flex-1 overflow-y-auto scrollbar-thin bg-chat-panel">
