@@ -1,14 +1,22 @@
-import { FileText, Calendar, Hash, Layers } from "lucide-react";
-import { Document, formatDate } from "@/lib/documentTypes";
+import { FileText, Calendar, Hash, Layers, Folder } from "lucide-react";
+import { Document, formatDate, CategoryNode } from "@/lib/documentTypes";
 import { StatusBadge } from "./StatusBadge";
 import { VersionHistory } from "./VersionHistory";
+import { CategorySelect } from "./CategorySelect";
 
 interface DocumentPreviewPanelProps {
   document: Document | null;
+  categories: CategoryNode[];
   onRollback: (documentId: string, versionId: string) => void;
+  onCategoryChange?: (documentId: string, category: string | undefined) => void;
 }
 
-export function DocumentPreviewPanel({ document, onRollback }: DocumentPreviewPanelProps) {
+export function DocumentPreviewPanel({
+  document,
+  categories,
+  onRollback,
+  onCategoryChange,
+}: DocumentPreviewPanelProps) {
   if (!document) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-panel-muted p-8">
@@ -40,6 +48,25 @@ export function DocumentPreviewPanel({ document, onRollback }: DocumentPreviewPa
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Category */}
+      <div className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center gap-2 mb-2 text-sm text-panel-muted">
+          <Folder className="w-4 h-4" />
+          <span>Kategori</span>
+        </div>
+        {onCategoryChange ? (
+          <CategorySelect
+            value={document.category}
+            categories={categories}
+            onChange={(cat) => onCategoryChange(document.id, cat)}
+          />
+        ) : (
+          <p className="text-sm text-panel-foreground">
+            {document.category || "Ingen kategori"}
+          </p>
+        )}
       </div>
 
       {/* Meta info */}

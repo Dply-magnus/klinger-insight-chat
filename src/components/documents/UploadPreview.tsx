@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { FileText, X, AlertTriangle, Plus, RefreshCw, Check, Pencil } from "lucide-react";
+import { FileText, X, AlertTriangle, Plus, RefreshCw, Check, Pencil, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { StagedFile, generateTitleFromFilename } from "@/lib/documentTypes";
+import { StagedFile, CategoryNode } from "@/lib/documentTypes";
+import { CategorySelect } from "./CategorySelect";
 import { cn } from "@/lib/utils";
 
 interface UploadPreviewProps {
   stagedFiles: StagedFile[];
+  categories: CategoryNode[];
   onUpdateTitle: (index: number, title: string) => void;
+  onUpdateCategory: (index: number, category: string | undefined) => void;
   onRemoveFile: (index: number) => void;
   onConfirmUpload: () => void;
   onCancel: () => void;
@@ -15,7 +18,9 @@ interface UploadPreviewProps {
 
 export function UploadPreview({
   stagedFiles,
+  categories,
   onUpdateTitle,
+  onUpdateCategory,
   onRemoveFile,
   onConfirmUpload,
   onCancel,
@@ -46,17 +51,19 @@ export function UploadPreview({
                 Nya dokument ({newFiles.length})
               </span>
             </div>
-            {newFiles.map((staged, idx) => {
+            {newFiles.map((staged) => {
               const originalIndex = stagedFiles.indexOf(staged);
               return (
                 <FileItem
-                  key={idx}
+                  key={originalIndex}
                   staged={staged}
                   index={originalIndex}
+                  categories={categories}
                   isEditing={editingIndex === originalIndex}
                   onEdit={() => setEditingIndex(originalIndex)}
                   onSaveEdit={() => setEditingIndex(null)}
                   onUpdateTitle={onUpdateTitle}
+                  onUpdateCategory={onUpdateCategory}
                   onRemove={onRemoveFile}
                 />
               );
@@ -80,17 +87,19 @@ export function UploadPreview({
                 Tidigare versioner sparas och kan återställas.
               </p>
             </div>
-            {replacements.map((staged, idx) => {
+            {replacements.map((staged) => {
               const originalIndex = stagedFiles.indexOf(staged);
               return (
                 <FileItem
-                  key={idx}
+                  key={originalIndex}
                   staged={staged}
                   index={originalIndex}
+                  categories={categories}
                   isEditing={editingIndex === originalIndex}
                   onEdit={() => setEditingIndex(originalIndex)}
                   onSaveEdit={() => setEditingIndex(null)}
                   onUpdateTitle={onUpdateTitle}
+                  onUpdateCategory={onUpdateCategory}
                   onRemove={onRemoveFile}
                   isReplacement
                 />
@@ -117,10 +126,12 @@ export function UploadPreview({
 interface FileItemProps {
   staged: StagedFile;
   index: number;
+  categories: CategoryNode[];
   isEditing: boolean;
   onEdit: () => void;
   onSaveEdit: () => void;
   onUpdateTitle: (index: number, title: string) => void;
+  onUpdateCategory: (index: number, category: string | undefined) => void;
   onRemove: (index: number) => void;
   isReplacement?: boolean;
 }
@@ -128,60 +139,77 @@ interface FileItemProps {
 function FileItem({
   staged,
   index,
+  categories,
   isEditing,
   onEdit,
   onSaveEdit,
   onUpdateTitle,
+  onUpdateCategory,
   onRemove,
   isReplacement,
 }: FileItemProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg border mb-2 last:mb-0",
+        "flex flex-col gap-2 p-3 rounded-lg border mb-2 last:mb-0",
         isReplacement ? "border-yellow-500/30 bg-yellow-500/5" : "border-border bg-background"
       )}
     >
-      <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
-        <FileText className="w-4 h-4 text-primary" />
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <FileText className="w-4 h-4 text-primary" />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Input
+                value={staged.title}
+                onChange={(e) => onUpdateTitle(index, e.target.value)}
+                className="h-8 text-sm"
+                autoFocus
+                onKeyDown={(e) => e.key === "Enter" && onSaveEdit()}
+              />
+              <Button size="sm" variant="ghost" onClick={onSaveEdit}>
+                <Check className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-sm text-foreground truncate">
+                {staged.title}
+              </span>
+              <button
+                onClick={onEdit}
+                className="p-1 rounded hover:bg-muted transition-colors"
+              >
+                <Pencil className="w-3 h-3 text-muted-foreground" />
+              </button>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground truncate">{staged.file.name}</p>
+        </div>
+
+        <button
+          onClick={() => onRemove(index)}
+          className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
+        >
+          <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+        </button>
       </div>
 
-      <div className="flex-1 min-w-0">
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <Input
-              value={staged.title}
-              onChange={(e) => onUpdateTitle(index, e.target.value)}
-              className="h-8 text-sm"
-              autoFocus
-              onKeyDown={(e) => e.key === "Enter" && onSaveEdit()}
-            />
-            <Button size="sm" variant="ghost" onClick={onSaveEdit}>
-              <Check className="w-4 h-4" />
-            </Button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-sm text-foreground truncate">
-              {staged.title}
-            </span>
-            <button
-              onClick={onEdit}
-              className="p-1 rounded hover:bg-muted transition-colors"
-            >
-              <Pencil className="w-3 h-3 text-muted-foreground" />
-            </button>
-          </div>
-        )}
-        <p className="text-xs text-muted-foreground truncate">{staged.file.name}</p>
+      {/* Category selector */}
+      <div className="flex items-center gap-2 pl-11">
+        <Folder className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1">
+          <CategorySelect
+            value={staged.category}
+            categories={categories}
+            onChange={(cat) => onUpdateCategory(index, cat)}
+            placeholder="Välj kategori (valfritt)"
+          />
+        </div>
       </div>
-
-      <button
-        onClick={() => onRemove(index)}
-        className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors"
-      >
-        <X className="w-4 h-4 text-muted-foreground hover:text-destructive" />
-      </button>
     </div>
   );
 }

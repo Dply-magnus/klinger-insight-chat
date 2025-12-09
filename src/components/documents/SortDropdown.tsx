@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-export type SortField = "date" | "title" | "filename";
+export type SortField = "date" | "title" | "filename" | "extension";
 export type SortDirection = "asc" | "desc";
 
 interface SortDropdownProps {
@@ -20,6 +20,7 @@ const sortOptions: { field: SortField; label: string }[] = [
   { field: "date", label: "Datum" },
   { field: "title", label: "Titel" },
   { field: "filename", label: "Filnamn" },
+  { field: "extension", label: "Filändelse" },
 ];
 
 export function SortDropdown({ field, direction, onChange }: SortDropdownProps) {
@@ -47,7 +48,7 @@ export function SortDropdown({ field, direction, onChange }: SortDropdownProps) 
           <ChevronDown className="w-3 h-3" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-popover">
         {sortOptions.map((option) => (
           <DropdownMenuItem
             key={option.field}
