@@ -34,6 +34,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export default function Documents() {
   const { toast } = useToast();
@@ -48,6 +53,7 @@ export default function Documents() {
   const [extensionFilter, setExtensionFilter] = useState<string | "all">("all");
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [showDeleted, setShowDeleted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Upload state
@@ -78,6 +84,13 @@ export default function Documents() {
     if (isMobile) {
       setMobileDrawerOpen(true);
     }
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setExtensionFilter("all");
+    setShowDeleted(false);
   };
 
   const handleFilesSelected = (files: File[]) => {
@@ -287,86 +300,164 @@ export default function Documents() {
 
   return (
     <div className="h-screen flex bg-background">
-      {/* Left: Category tree - Desktop only */}
-      <aside className="w-[240px] flex-shrink-0 bg-card border-r border-border hidden lg:flex flex-col">
-        <CategoryTree
-          categories={categories}
-          documents={documents}
-          selectedCategory={selectedCategory}
-          selectedDocumentId={selectedDocumentId}
-          onSelectCategory={setSelectedCategory}
-          onSelectDocument={handleSelectDocument}
-          totalCount={documents.length}
-          uncategorizedCount={uncategorizedCount}
-        />
-      </aside>
-
-      {/* Center: Document list and upload */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <PageHeader
-          title="Dokumenthantering"
-          subtitle="Hantera chatbotens kunskapsbas"
-          icon={<FileText className="w-5 h-5 text-primary" />}
-        />
-
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Upload zone */}
-          <div className="p-4 border-b border-border">
-            {stagedFiles.length > 0 ? (
-              <UploadPreview
-                stagedFiles={stagedFiles}
+      {/* Desktop layout with resizable panels */}
+      <div className="hidden lg:flex flex-1">
+        <ResizablePanelGroup direction="horizontal">
+          {/* Left: Category tree - Resizable */}
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={35}>
+            <aside className="h-full bg-card border-r border-border flex flex-col">
+              <CategoryTree
                 categories={categories}
-                onUpdateTitle={handleUpdateStagedTitle}
-                onUpdateCategory={handleUpdateStagedCategory}
-                onRemoveFile={handleRemoveStagedFile}
-                onConfirmUpload={handleConfirmUpload}
-                onCancel={() => setStagedFiles([])}
+                documents={documents}
+                selectedCategory={selectedCategory}
+                selectedDocumentId={selectedDocumentId}
+                onSelectCategory={setSelectedCategory}
+                onSelectDocument={handleSelectDocument}
+                totalCount={documents.length}
+                uncategorizedCount={uncategorizedCount}
               />
-            ) : (
-              <DocumentUploadZone onFilesSelected={handleFilesSelected} />
-            )}
-          </div>
+            </aside>
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
 
-          {/* Document list */}
-          <div className="flex-1 overflow-hidden">
-            <DocumentList
-              documents={documents}
-              selectedId={selectedDocumentId}
-              searchQuery={searchQuery}
-              statusFilter={statusFilter}
-              extensionFilter={extensionFilter}
-              sortField={sortField}
-              sortDirection={sortDirection}
-              selectedCategory={selectedCategory}
-              extensions={extensions}
-              onSelectDocument={handleSelectDocument}
-              onSearchChange={setSearchQuery}
-              onStatusFilterChange={setStatusFilter}
-              onExtensionFilterChange={setExtensionFilter}
-              onSortChange={(field, dir) => {
-                setSortField(field);
-                setSortDirection(dir);
-              }}
-              onCategoryChange={setSelectedCategory}
-              onActivate={handleActivate}
-              onDeactivate={handleDeactivate}
-              onDelete={(id) => setDeleteConfirm(id)}
-            />
-          </div>
-        </div>
-      </main>
+          {/* Center: Document list and upload */}
+          <ResizablePanel defaultSize={50} minSize={30}>
+            <main className="h-full flex flex-col min-w-0">
+              <PageHeader
+                title="Dokumenthantering"
+                subtitle="Hantera chatbotens kunskapsbas"
+                icon={<FileText className="w-5 h-5 text-primary" />}
+              />
 
-      {/* Right: Preview panel - Desktop */}
-      <aside className="w-[380px] flex-shrink-0 bg-panel border-l border-sidebar-border hidden lg:flex flex-col">
-        <DocumentPreviewPanel
-          document={selectedDocument}
-          categories={categories}
-          onRollback={(docId, versionId) =>
-            setRollbackConfirm({ docId, versionId })
-          }
-          onCategoryChange={handleDocumentCategoryChange}
-        />
-      </aside>
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Upload zone */}
+                <div className="p-4 border-b border-border">
+                  {stagedFiles.length > 0 ? (
+                    <UploadPreview
+                      stagedFiles={stagedFiles}
+                      categories={categories}
+                      onUpdateTitle={handleUpdateStagedTitle}
+                      onUpdateCategory={handleUpdateStagedCategory}
+                      onRemoveFile={handleRemoveStagedFile}
+                      onConfirmUpload={handleConfirmUpload}
+                      onCancel={() => setStagedFiles([])}
+                    />
+                  ) : (
+                    <DocumentUploadZone onFilesSelected={handleFilesSelected} />
+                  )}
+                </div>
+
+                {/* Document list */}
+                <div className="flex-1 overflow-hidden">
+                  <DocumentList
+                    documents={documents}
+                    selectedId={selectedDocumentId}
+                    searchQuery={searchQuery}
+                    statusFilter={statusFilter}
+                    extensionFilter={extensionFilter}
+                    sortField={sortField}
+                    sortDirection={sortDirection}
+                    selectedCategory={selectedCategory}
+                    extensions={extensions}
+                    showDeleted={showDeleted}
+                    onSelectDocument={handleSelectDocument}
+                    onSearchChange={setSearchQuery}
+                    onStatusFilterChange={setStatusFilter}
+                    onExtensionFilterChange={setExtensionFilter}
+                    onSortChange={(field, dir) => {
+                      setSortField(field);
+                      setSortDirection(dir);
+                    }}
+                    onCategoryChange={setSelectedCategory}
+                    onShowDeletedChange={setShowDeleted}
+                    onClearFilters={handleClearFilters}
+                    onActivate={handleActivate}
+                    onDeactivate={handleDeactivate}
+                    onDelete={(id) => setDeleteConfirm(id)}
+                  />
+                </div>
+              </div>
+            </main>
+          </ResizablePanel>
+          
+          <ResizableHandle withHandle />
+
+          {/* Right: Preview panel - Desktop */}
+          <ResizablePanel defaultSize={30} minSize={20} maxSize={45}>
+            <aside className="h-full bg-panel border-l border-sidebar-border flex flex-col">
+              <DocumentPreviewPanel
+                document={selectedDocument}
+                categories={categories}
+                onRollback={(docId, versionId) =>
+                  setRollbackConfirm({ docId, versionId })
+                }
+                onCategoryChange={handleDocumentCategoryChange}
+              />
+            </aside>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+
+      {/* Mobile layout */}
+      <div className="lg:hidden flex-1 flex flex-col">
+        <main className="flex-1 flex flex-col min-w-0">
+          <PageHeader
+            title="Dokumenthantering"
+            subtitle="Hantera chatbotens kunskapsbas"
+            icon={<FileText className="w-5 h-5 text-primary" />}
+          />
+
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {/* Upload zone */}
+            <div className="p-4 border-b border-border">
+              {stagedFiles.length > 0 ? (
+                <UploadPreview
+                  stagedFiles={stagedFiles}
+                  categories={categories}
+                  onUpdateTitle={handleUpdateStagedTitle}
+                  onUpdateCategory={handleUpdateStagedCategory}
+                  onRemoveFile={handleRemoveStagedFile}
+                  onConfirmUpload={handleConfirmUpload}
+                  onCancel={() => setStagedFiles([])}
+                />
+              ) : (
+                <DocumentUploadZone onFilesSelected={handleFilesSelected} />
+              )}
+            </div>
+
+            {/* Document list */}
+            <div className="flex-1 overflow-hidden">
+              <DocumentList
+                documents={documents}
+                selectedId={selectedDocumentId}
+                searchQuery={searchQuery}
+                statusFilter={statusFilter}
+                extensionFilter={extensionFilter}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                selectedCategory={selectedCategory}
+                extensions={extensions}
+                showDeleted={showDeleted}
+                onSelectDocument={handleSelectDocument}
+                onSearchChange={setSearchQuery}
+                onStatusFilterChange={setStatusFilter}
+                onExtensionFilterChange={setExtensionFilter}
+                onSortChange={(field, dir) => {
+                  setSortField(field);
+                  setSortDirection(dir);
+                }}
+                onCategoryChange={setSelectedCategory}
+                onShowDeletedChange={setShowDeleted}
+                onClearFilters={handleClearFilters}
+                onActivate={handleActivate}
+                onDeactivate={handleDeactivate}
+                onDelete={(id) => setDeleteConfirm(id)}
+              />
+            </div>
+          </div>
+        </main>
+      </div>
 
       {/* Mobile: Preview Drawer */}
       <Sheet open={mobileDrawerOpen} onOpenChange={setMobileDrawerOpen}>

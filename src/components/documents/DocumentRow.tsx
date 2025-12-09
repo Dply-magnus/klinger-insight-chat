@@ -32,36 +32,29 @@ export function DocumentRow({
   const { title, filename, currentVersion } = document;
   const status = currentVersion.status;
 
+  const versionCount = document.versions.length;
+
   return (
     <div
       onClick={onClick}
       className={cn(
-        "group flex items-center gap-4 p-4 border-b border-border cursor-pointer transition-colors",
+        "group flex items-center gap-3 px-4 py-3 border-b border-border cursor-pointer transition-colors",
         isSelected ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted/50"
       )}
     >
       {/* Icon */}
-      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-        <FileText className="w-5 h-5 text-primary" />
+      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+        <FileText className="w-4 h-4 text-primary" />
       </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <h3 className="font-medium text-foreground truncate">{title}</h3>
-          <StatusBadge status={status} />
-        </div>
-        <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-          <span className="truncate">{filename}</span>
-          <span className="hidden sm:inline">•</span>
-          <span className="hidden sm:inline whitespace-nowrap">{formatDate(currentVersion.uploadedAt)}</span>
-        </div>
-        {document.versions.length > 1 && (
-          <div className="mt-1">
-            <span className="text-xs text-muted-foreground">
-              {document.versions.length} versioner
-            </span>
-          </div>
+      {/* Content - simplified: title + status + version count */}
+      <div className="flex-1 min-w-0 flex items-center gap-3">
+        <h3 className="font-medium text-foreground truncate flex-1">{title}</h3>
+        <StatusBadge status={status} />
+        {versionCount > 1 && (
+          <span className="text-xs text-muted-foreground whitespace-nowrap">
+            {versionCount} v
+          </span>
         )}
       </div>
 

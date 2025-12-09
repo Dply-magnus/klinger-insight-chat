@@ -1,12 +1,14 @@
 import { useMemo } from "react";
 import { Document, DocumentStatus, getFileExtension } from "@/lib/documentTypes";
 import { DocumentSearch } from "./DocumentSearch";
-import { StatusFilter } from "./StatusFilter";
 import { SortDropdown, SortField, SortDirection } from "./SortDropdown";
 import { ExtensionFilter } from "./ExtensionFilter";
 import { CategoryBreadcrumb } from "./CategoryBreadcrumb";
 import { DocumentRow } from "./DocumentRow";
-import { FileText } from "lucide-react";
+import { FileText, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 interface DocumentListProps {
   documents: Document[];
@@ -18,12 +20,15 @@ interface DocumentListProps {
   sortDirection: SortDirection;
   selectedCategory: string | null;
   extensions: string[];
+  showDeleted: boolean;
   onSelectDocument: (id: string) => void;
   onSearchChange: (query: string) => void;
   onStatusFilterChange: (status: DocumentStatus | "all") => void;
   onExtensionFilterChange: (ext: string | "all") => void;
   onSortChange: (field: SortField, direction: SortDirection) => void;
   onCategoryChange: (path: string | null) => void;
+  onShowDeletedChange: (show: boolean) => void;
+  onClearFilters: () => void;
   onActivate: (id: string) => void;
   onDeactivate: (id: string) => void;
   onDelete: (id: string) => void;
@@ -39,19 +44,30 @@ export function DocumentList({
   sortDirection,
   selectedCategory,
   extensions,
+  showDeleted,
   onSelectDocument,
   onSearchChange,
   onStatusFilterChange,
   onExtensionFilterChange,
   onSortChange,
   onCategoryChange,
+  onShowDeletedChange,
+  onClearFilters,
   onActivate,
   onDeactivate,
   onDelete,
 }: DocumentListProps) {
+  // Check if any filters are active
+  const hasActiveFilters = searchQuery || statusFilter !== "all" || extensionFilter !== "all" || showDeleted;
+
   // Filter and sort documents
   const filteredDocuments = useMemo(() => {
     let result = [...documents];
+
+    // Hide deleted by default unless showDeleted is true
+    if (!showDeleted) {
+      result = result.filter((doc) => doc.currentVersion.status !== "deleted");
+    }
 
     // Category filter
     if (selectedCategory === "__uncategorized__") {
@@ -121,6 +137,7 @@ export function DocumentList({
     sortField,
     sortDirection,
     selectedCategory,
+    showDeleted,
   ]);
 
   // Count by status
@@ -163,17 +180,38 @@ export function DocumentList({
           />
         </div>
 
-        <StatusFilter
-          selected={statusFilter}
-          onChange={onStatusFilterChange}
-          counts={counts}
-        />
-
-        <ExtensionFilter
-          extensions={extensions}
-          selected={extensionFilter}
-          onChange={onExtensionFilterChange}
-        />
+        <div className="flex items-center justify-between">
+          <ExtensionFilter
+            extensions={extensions}
+            selected={extensionFilter}
+            onChange={onExtensionFilterChange}
+          />
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Checkbox 
+                id="show-deleted" 
+                checked={showDeleted}
+                onCheckedChange={(checked) => onShowDeletedChange(!!checked)}
+              />
+              <Label htmlFor="show-deleted" className="text-xs text-muted-foreground cursor-pointer">
+                Visa raderade
+              </Label>
+            </div>
+            
+            {hasActiveFilters && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onClearFilters}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Rensa
+              </Button>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Document list */}
