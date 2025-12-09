@@ -265,7 +265,7 @@ function CategoryItem({
             />
           ))}
           
-          {/* Documents directly in this category */}
+          {/* Documents directly in this category - same indentation as subcategories */}
           {directDocuments.map((doc) => (
             <DocumentItem
               key={doc.id}
@@ -273,6 +273,7 @@ function CategoryItem({
               isSelected={selectedDocumentId === doc.id}
               onSelect={() => onSelectDocument(doc.id)}
               level={level + 1}
+              hasChevronSpace={true}
             />
           ))}
         </div>
@@ -286,9 +287,10 @@ interface DocumentItemProps {
   isSelected: boolean;
   onSelect: () => void;
   level: number;
+  hasChevronSpace?: boolean;
 }
 
-function DocumentItem({ document, isSelected, onSelect, level }: DocumentItemProps) {
+function DocumentItem({ document, isSelected, onSelect, level, hasChevronSpace = false }: DocumentItemProps) {
   const ext = getFileExtension(document.filename).toUpperCase();
   
   return (
@@ -302,6 +304,8 @@ function DocumentItem({ document, isSelected, onSelect, level }: DocumentItemPro
       )}
       style={{ paddingLeft: `${12 + level * 16}px` }}
     >
+      {/* Add spacer to align with folder icons (chevron width) */}
+      {hasChevronSpace && <span className="w-4 flex-shrink-0" />}
       <FileText className={cn(
         "w-4 h-4 flex-shrink-0",
         isSelected ? "text-accent-foreground" : "text-muted-foreground"
