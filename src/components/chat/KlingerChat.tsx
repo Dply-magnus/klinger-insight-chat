@@ -33,8 +33,17 @@ export function KlingerChat() {
     sendMessage(content);
   };
 
+  // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Auto-select latest message with images
+  useEffect(() => {
+    const latestMessageWithImages = [...messages].reverse().find(m => m.images?.length);
+    if (latestMessageWithImages && latestMessageWithImages.id !== selectedMessageId) {
+      setSelectedMessageId(latestMessageWithImages.id);
+    }
   }, [messages]);
 
   return (
