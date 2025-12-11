@@ -45,6 +45,7 @@ export type Database = {
           document_id: string
           id: string
           size: number
+          status: Database["public"]["Enums"]["klinger_document_status"]
           storage_path: string
           uploaded_by: string
           version: string
@@ -55,6 +56,7 @@ export type Database = {
           document_id: string
           id?: string
           size?: number
+          status?: Database["public"]["Enums"]["klinger_document_status"]
           storage_path: string
           uploaded_by: string
           version: string
@@ -65,6 +67,7 @@ export type Database = {
           document_id?: string
           id?: string
           size?: number
+          status?: Database["public"]["Enums"]["klinger_document_status"]
           storage_path?: string
           uploaded_by?: string
           version?: string
@@ -203,7 +206,7 @@ export type Database = {
       }
     }
     Enums: {
-      klinger_document_status: "active" | "pending" | "archived" | "draft"
+      klinger_document_status: "active" | "pending" | "inactive" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -331,7 +334,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      klinger_document_status: ["active", "pending", "archived", "draft"],
+      klinger_document_status: ["active", "pending", "inactive", "deleted"],
     },
   },
 } as const
