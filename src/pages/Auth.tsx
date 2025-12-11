@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Mail, Lock, User, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, Lock, User } from "lucide-react";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -139,65 +139,18 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-sidebar-background p-12 flex-col justify-between">
+    <div className="min-h-screen flex items-center justify-center bg-background p-8">
+      <div className="w-full max-w-md space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-sidebar-foreground">
-            KLINGER
-          </h1>
-          <p className="text-sidebar-accent-foreground/70 mt-2">
-            Dokumenthantering
+          <h2 className="text-2xl font-bold text-foreground">
+            {isSignup ? "Skapa konto" : "Logga in"}
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            {isSignup
+              ? "Fyll i dina uppgifter för att skapa ett konto"
+              : "Välkommen tillbaka! Logga in för att fortsätta"}
           </p>
         </div>
-        
-        <div className="space-y-6">
-          <div className="p-6 bg-sidebar-accent/30 rounded-xl border border-sidebar-border">
-            <h3 className="text-xl font-semibold text-sidebar-foreground mb-2">
-              Hantera dokument enkelt
-            </h3>
-            <p className="text-sidebar-foreground/70">
-              Ladda upp, organisera och versionshantera dina PDF-dokument för chatboten.
-            </p>
-          </div>
-          <div className="p-6 bg-sidebar-accent/30 rounded-xl border border-sidebar-border">
-            <h3 className="text-xl font-semibold text-sidebar-foreground mb-2">
-              Säker lagring
-            </h3>
-            <p className="text-sidebar-foreground/70">
-              Alla dokument lagras säkert i molnet med fullständig versionshistorik.
-            </p>
-          </div>
-        </div>
-        
-        <p className="text-sidebar-foreground/50 text-sm">
-          © {new Date().getFullYear()} KLINGER Sweden
-        </p>
-      </div>
-
-      {/* Right side - Auth form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate("/")}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">
-                {isSignup ? "Skapa konto" : "Logga in"}
-              </h2>
-              <p className="text-muted-foreground mt-1">
-                {isSignup
-                  ? "Fyll i dina uppgifter för att skapa ett konto"
-                  : "Välkommen tillbaka! Logga in för att fortsätta"}
-              </p>
-            </div>
-          </div>
 
           <form onSubmit={isSignup ? handleSignup : handleLogin} className="space-y-5">
             {isSignup && (
@@ -304,7 +257,6 @@ export default function Auth() {
               Tips: Om du testar lokalt, inaktivera "Confirm email" i Supabase Dashboard under Authentication → Providers → Email.
             </p>
           )}
-        </div>
       </div>
     </div>
   );
