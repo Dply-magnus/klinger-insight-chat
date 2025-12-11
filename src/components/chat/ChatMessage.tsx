@@ -4,12 +4,13 @@ import { Bot, User } from "lucide-react";
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
+  htmlContent?: string;
   isSelected?: boolean;
   onClick?: () => void;
   hasImages?: boolean;
 }
 
-export function ChatMessage({ role, content, isSelected, onClick, hasImages }: ChatMessageProps) {
+export function ChatMessage({ role, content, htmlContent, isSelected, onClick, hasImages }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
@@ -51,7 +52,11 @@ export function ChatMessage({ role, content, isSelected, onClick, hasImages }: C
               : "bg-chat-bot text-chat-bot-foreground shadow-sm border border-border/50 rounded-bl-md"
           )}
         >
-          {content}
+          {role === 'assistant' && htmlContent ? (
+            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          ) : (
+            content
+          )}
         </div>
         
         {/* Image indicator */}
