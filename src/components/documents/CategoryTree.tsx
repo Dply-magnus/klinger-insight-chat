@@ -60,17 +60,16 @@ export function CategoryTree({
   // Get uncategorized documents
   const uncategorizedDocs = documents.filter((d) => !d.category);
   
-  // State for creating new category
-  const [isCreating, setIsCreating] = useState(false);
+  // State for creating new category at root level (from header button)
+  const [isCreatingRoot, setIsCreatingRoot] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
 
-  const handleCreateCategory = () => {
+  const handleCreateRootCategory = () => {
     if (newCategoryName.trim()) {
-      // Create under currently selected category (or root if none selected or __uncategorized__)
-      const parentPath = selectedCategory === "__uncategorized__" ? null : selectedCategory;
-      onCreateCategory(parentPath, newCategoryName.trim());
+      // Always create at root level when using the header + button
+      onCreateCategory(null, newCategoryName.trim());
       setNewCategoryName("");
-      setIsCreating(false);
+      setIsCreatingRoot(false);
     }
   };
 
@@ -84,7 +83,7 @@ export function CategoryTree({
           variant="ghost"
           size="icon"
           className="h-6 w-6"
-          onClick={() => setIsCreating(true)}
+          onClick={() => setIsCreatingRoot(true)}
           title="Skapa ny mapp"
         >
           <FolderPlus className="w-4 h-4" />
@@ -111,7 +110,7 @@ export function CategoryTree({
         </button>
 
         {/* New root category input */}
-        {isCreating && (
+        {isCreatingRoot && (
           <div className="flex items-center gap-2 mt-2 mb-1 px-3">
             <Folder className="w-4 h-4 text-muted-foreground flex-shrink-0" />
             <Input
@@ -121,22 +120,22 @@ export function CategoryTree({
               className="h-7 text-xs flex-1"
               autoFocus
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleCreateCategory();
+                if (e.key === "Enter") handleCreateRootCategory();
                 if (e.key === "Escape") {
-                  setIsCreating(false);
+                  setIsCreatingRoot(false);
                   setNewCategoryName("");
                 }
               }}
               onBlur={() => {
                 if (!newCategoryName.trim()) {
-                  setIsCreating(false);
+                  setIsCreatingRoot(false);
                 }
               }}
             />
             <Button 
               size="icon" 
               className="h-7 w-7" 
-              onClick={handleCreateCategory}
+              onClick={handleCreateRootCategory}
               disabled={!newCategoryName.trim()}
             >
               <Plus className="w-3 h-3" />
@@ -146,7 +145,7 @@ export function CategoryTree({
               variant="ghost"
               className="h-7 w-7"
               onClick={() => {
-                setIsCreating(false);
+                setIsCreatingRoot(false);
                 setNewCategoryName("");
               }}
             >
