@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { FileText, Loader2, LogIn } from "lucide-react";
+import { FileText, Loader2, LogIn, Upload } from "lucide-react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { DocumentUploadZone } from "@/components/documents/DocumentUploadZone";
@@ -76,6 +76,7 @@ export default function Documents() {
 
   // Upload state
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
+  const [showUploadZone, setShowUploadZone] = useState(false);
 
   // Confirmation dialogs
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -307,6 +308,7 @@ export default function Documents() {
         description: `${stagedFiles.length} fil${stagedFiles.length !== 1 ? "er" : ""} har laddats upp.`,
       });
       setStagedFiles([]);
+      setShowUploadZone(false);
     } catch (err) {
       console.error('Upload error:', err);
       toast({
@@ -486,15 +488,35 @@ export default function Documents() {
             <main className="h-full flex flex-col min-w-0">
               <PageHeader
                 title="Dokumenthantering"
-                subtitle="Hantera chatbotens kunskapsbas"
                 icon={<FileText className="w-5 h-5 text-primary" />}
               />
 
               <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Upload zone */}
-                <div className="p-4 border-b border-border">
-                  {renderUploadZone()}
+                {/* Breadcrumb bar with upload button */}
+                <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-4">
+                  <CategoryBreadcrumb
+                    category={selectedCategory}
+                    onNavigate={setSelectedCategory}
+                  />
+                  {user && (
+                    <Button
+                      variant={showUploadZone ? "secondary" : "outline"}
+                      size="sm"
+                      onClick={() => setShowUploadZone(!showUploadZone)}
+                      className="shrink-0"
+                    >
+                      <Upload className="w-4 h-4 mr-2" />
+                      Ladda upp
+                    </Button>
+                  )}
                 </div>
+
+                {/* Upload zone - conditionally shown */}
+                {(showUploadZone || stagedFiles.length > 0) && (
+                  <div className="p-4 border-b border-border">
+                    {renderUploadZone()}
+                  </div>
+                )}
 
                 {/* Document list */}
                 <div className="flex-1 overflow-hidden">
@@ -552,25 +574,37 @@ export default function Documents() {
         <main className="flex-1 flex flex-col min-w-0">
           <PageHeader
             title="Dokumenthantering"
-            subtitle="Hantera chatbotens kunskapsbas"
             icon={<FileText className="w-5 h-5 text-primary" />}
           />
 
-          {/* Category breadcrumb trigger for mobile */}
-          <div className="px-4 py-2 border-b border-border bg-card">
+          {/* Category breadcrumb trigger for mobile with upload button */}
+          <div className="px-4 py-2 border-b border-border bg-card flex items-center justify-between gap-2">
             <CategoryBreadcrumb
               category={selectedCategory}
               onNavigate={setSelectedCategory}
               compact
               onClick={() => setMobileCategoryDrawerOpen(true)}
             />
+            {user && (
+              <Button
+                variant={showUploadZone ? "secondary" : "outline"}
+                size="sm"
+                onClick={() => setShowUploadZone(!showUploadZone)}
+                className="shrink-0"
+              >
+                <Upload className="w-4 h-4 mr-1" />
+                Ladda upp
+              </Button>
+            )}
           </div>
 
           <div className="flex-1 flex flex-col overflow-hidden">
-            {/* Upload zone */}
-            <div className="p-4 border-b border-border">
-              {renderUploadZone()}
-            </div>
+            {/* Upload zone - conditionally shown */}
+            {(showUploadZone || stagedFiles.length > 0) && (
+              <div className="p-4 border-b border-border">
+                {renderUploadZone()}
+              </div>
+            )}
 
             {/* Document list */}
             <div className="flex-1 overflow-hidden">
