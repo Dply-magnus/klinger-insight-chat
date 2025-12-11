@@ -56,7 +56,8 @@ export default function Documents() {
     replaceDocument, 
     updateStatus, 
     updateCategory, 
-    rollbackVersion 
+    rollbackVersion,
+    deleteDocument,
   } = useDocumentMutations();
 
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
@@ -210,6 +211,25 @@ export default function Documents() {
       title: "Mapp borttagen",
       description: "Filerna i mappen är nu okategoriserade.",
     });
+  };
+
+  const handleDeleteDocument = async (documentId: string) => {
+    try {
+      await deleteDocument.mutateAsync(documentId);
+      if (selectedDocumentId === documentId) {
+        setSelectedDocumentId(null);
+      }
+      toast({
+        title: "Dokument borttaget",
+        description: "Dokumentet har tagits bort permanent.",
+      });
+    } catch (error) {
+      toast({
+        title: "Fel",
+        description: "Kunde inte ta bort dokumentet.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleFilesSelected = (files: File[]) => {
@@ -452,6 +472,7 @@ export default function Documents() {
                 onCreateCategory={handleCreateCategory}
                 onRenameCategory={handleRenameCategory}
                 onDeleteCategory={handleDeleteCategory}
+                onDeleteDocument={handleDeleteDocument}
                 totalCount={documents.length}
                 uncategorizedCount={uncategorizedCount}
               />
@@ -606,6 +627,7 @@ export default function Documents() {
                 onCreateCategory={handleCreateCategory}
                 onRenameCategory={handleRenameCategory}
                 onDeleteCategory={handleDeleteCategory}
+                onDeleteDocument={handleDeleteDocument}
                 totalCount={documents.length}
                 uncategorizedCount={uncategorizedCount}
               />

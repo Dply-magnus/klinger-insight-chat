@@ -40,6 +40,7 @@ interface CategoryTreeProps {
   onCreateCategory: (parentPath: string | null, name: string) => void;
   onRenameCategory: (oldPath: string, newName: string) => void;
   onDeleteCategory: (path: string) => void;
+  onDeleteDocument: (id: string) => void;
   totalCount: number;
   uncategorizedCount: number;
 }
@@ -54,6 +55,7 @@ export function CategoryTree({
   onCreateCategory,
   onRenameCategory,
   onDeleteCategory,
+  onDeleteDocument,
   totalCount,
   uncategorizedCount,
 }: CategoryTreeProps) {
@@ -167,6 +169,7 @@ export function CategoryTree({
             onCreateCategory={onCreateCategory}
             onRenameCategory={onRenameCategory}
             onDeleteCategory={onDeleteCategory}
+            onDeleteDocument={onDeleteDocument}
             level={0}
           />
         ))}
@@ -179,6 +182,7 @@ export function CategoryTree({
             selectedDocumentId={selectedDocumentId}
             onSelectCategory={onSelectCategory}
             onSelectDocument={onSelectDocument}
+            onDeleteDocument={onDeleteDocument}
             count={uncategorizedCount}
           />
         )}
@@ -193,6 +197,7 @@ interface UncategorizedSectionProps {
   selectedDocumentId: string | null;
   onSelectCategory: (path: string | null) => void;
   onSelectDocument: (id: string) => void;
+  onDeleteDocument: (id: string) => void;
   count: number;
 }
 
@@ -202,6 +207,7 @@ function UncategorizedSection({
   selectedDocumentId,
   onSelectCategory,
   onSelectDocument,
+  onDeleteDocument,
   count,
 }: UncategorizedSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -251,6 +257,7 @@ function UncategorizedSection({
               document={doc}
               isSelected={selectedDocumentId === doc.id}
               onSelect={() => onSelectDocument(doc.id)}
+              onDelete={() => onDeleteDocument(doc.id)}
               level={1}
             />
           ))}
@@ -270,6 +277,7 @@ interface CategoryItemProps {
   onCreateCategory: (parentPath: string | null, name: string) => void;
   onRenameCategory: (oldPath: string, newName: string) => void;
   onDeleteCategory: (path: string) => void;
+  onDeleteDocument: (id: string) => void;
   level: number;
 }
 
@@ -283,6 +291,7 @@ function CategoryItem({
   onCreateCategory,
   onRenameCategory,
   onDeleteCategory,
+  onDeleteDocument,
   level,
 }: CategoryItemProps) {
   const [isExpanded, setIsExpanded] = useState(
@@ -419,7 +428,10 @@ function CategoryItem({
           )}
           
           {isExpanded ? (
-            <FolderOpen className="w-4 h-4 text-primary" />
+            <FolderOpen className={cn(
+              "w-4 h-4",
+              isSelected ? "text-primary-foreground" : "text-primary"
+            )} />
           ) : (
             <Folder className={cn(
               "w-4 h-4",
@@ -562,6 +574,7 @@ function CategoryItem({
                 onCreateCategory={onCreateCategory}
                 onRenameCategory={onRenameCategory}
                 onDeleteCategory={onDeleteCategory}
+                onDeleteDocument={onDeleteDocument}
                 level={level + 1}
               />
             ))}
@@ -573,6 +586,7 @@ function CategoryItem({
                 document={doc}
                 isSelected={selectedDocumentId === doc.id}
                 onSelect={() => onSelectDocument(doc.id)}
+                onDelete={() => onDeleteDocument(doc.id)}
                 level={level + 1}
                 hasChevronSpace={true}
               />
@@ -588,39 +602,77 @@ interface DocumentItemProps {
   document: Document;
   isSelected: boolean;
   onSelect: () => void;
+  onDelete: () => void;
   level: number;
   hasChevronSpace?: boolean;
 }
 
-function DocumentItem({ document, isSelected, onSelect, level, hasChevronSpace = false }: DocumentItemProps) {
+function DocumentItem({ document, isSelected, onSelect, onDelete, level, hasChevronSpace = false }: DocumentItemProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const ext = getFileExtension(document.filename).toUpperCase();
   
   return (
-    <button
-      onClick={onSelect}
-      className={cn(
-        "w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors",
-        isSelected
-          ? "bg-accent text-accent-foreground"
-          : "text-foreground/80 hover:bg-muted"
-      )}
-      style={{ paddingLeft: `${12 + level * 16}px` }}
-    >
-      {/* Add spacer to align with folder icons (chevron width) */}
-      {hasChevronSpace && <span className="w-4 flex-shrink-0" />}
-      <FileText className={cn(
-        "w-4 h-4 flex-shrink-0",
-        isSelected ? "text-accent-foreground" : "text-muted-foreground"
-      )} />
-      <span className="flex-1 text-left truncate text-xs">{document.title}</span>
-      {ext && (
-        <span className={cn(
-          "text-[10px] px-1 py-0.5 rounded uppercase",
-          isSelected ? "bg-accent-foreground/20" : "bg-muted text-muted-foreground"
-        )}>
-          {ext}
+    <>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort dokument?</AlertDialogTitle>
+            <AlertDialogDescription>
+              "{document.title}" kommer att tas bort permanent. Detta går inte att ångra.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Ta bort
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <div
+        className={cn(
+          "group w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer",
+          isSelected
+            ? "bg-accent text-accent-foreground"
+            : "text-foreground/80 hover:bg-muted"
+        )}
+        style={{ paddingLeft: `${12 + level * 16}px` }}
+        onClick={onSelect}
+      >
+        {/* Add spacer to align with folder icons (chevron width) */}
+        {hasChevronSpace && <span className="w-4 flex-shrink-0" />}
+        <FileText className={cn(
+          "w-4 h-4 flex-shrink-0",
+          isSelected ? "text-accent-foreground" : "text-muted-foreground"
+        )} />
+        <span className="flex-1 text-left truncate text-xs">{document.title}</span>
+        {ext && (
+          <span className={cn(
+            "text-[10px] px-1 py-0.5 rounded uppercase",
+            isSelected ? "bg-accent-foreground/20" : "bg-muted text-muted-foreground"
+          )}>
+            {ext}
+          </span>
+        )}
+        <span
+          role="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowDeleteConfirm(true);
+          }}
+          className={cn(
+            "p-1 rounded hover:bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer",
+            isSelected && "hover:bg-accent-foreground/20"
+          )}
+          title="Ta bort dokument"
+        >
+          <Trash2 className="w-3 h-3" />
         </span>
-      )}
-    </button>
+      </div>
+    </>
   );
 }

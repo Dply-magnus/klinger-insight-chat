@@ -203,11 +203,30 @@ export function useDocumentMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
   });
 
+  // Delete document
+  const deleteDocument = useMutation({
+    mutationFn: async (documentId: string) => {
+      // Delete all versions first
+      await supabase
+        .from('klinger_document_versions')
+        .delete()
+        .eq('document_id', documentId);
+
+      // Delete the document
+      await supabase
+        .from('klinger_documents')
+        .delete()
+        .eq('id', documentId);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
+  });
+
   return {
     uploadDocument,
     replaceDocument,
     updateStatus,
     updateCategory,
     rollbackVersion,
+    deleteDocument,
   };
 }
