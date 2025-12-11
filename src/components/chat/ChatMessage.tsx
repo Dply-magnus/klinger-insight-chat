@@ -7,10 +7,9 @@ interface ChatMessageProps {
   htmlContent?: string;
   isSelected?: boolean;
   onClick?: () => void;
-  hasImages?: boolean;
 }
 
-export function ChatMessage({ role, content, htmlContent, isSelected, onClick, hasImages }: ChatMessageProps) {
+export function ChatMessage({ role, content, htmlContent, isSelected, onClick }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
@@ -58,14 +57,6 @@ export function ChatMessage({ role, content, htmlContent, isSelected, onClick, h
             content
           )}
         </div>
-        
-        {/* Image indicator */}
-        {hasImages && !isUser && (
-          <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-subtle" />
-            <span>Dokumentation tillgänglig</span>
-          </div>
-        )}
       </div>
     </div>
   );
