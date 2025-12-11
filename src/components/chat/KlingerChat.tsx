@@ -25,7 +25,10 @@ export function KlingerChat() {
   const handleMessageClick = (message: ChatMessageType) => {
     if (message.images?.length) {
       setSelectedMessageId(message.id);
-      setMobileDrawerOpen(true);
+      // Only open drawer on mobile (< lg breakpoint)
+      if (window.innerWidth < 1024) {
+        setMobileDrawerOpen(true);
+      }
     }
   };
 
