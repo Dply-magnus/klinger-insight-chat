@@ -71,6 +71,7 @@ export default function Documents() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [showDeleted, setShowDeleted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [emptyCategories, setEmptyCategories] = useState<string[]>([]);
 
   // Upload state
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
@@ -87,7 +88,34 @@ export default function Documents() {
     [documents, selectedDocumentId]
   );
 
-  const categories = useMemo(() => parseCategories(documents), [documents]);
+  const categories = useMemo(() => {
+    const docCategories = parseCategories(documents);
+    
+    // Add empty categories that don't exist in documents
+    emptyCategories.forEach(emptyPath => {
+      const segments = emptyPath.split("/");
+      let currentLevel = docCategories;
+      let currentPath = "";
+      
+      segments.forEach((segment, index) => {
+        currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+        let existing = currentLevel.find(c => c.path === currentPath);
+        
+        if (!existing) {
+          existing = {
+            name: segment,
+            path: currentPath,
+            children: [],
+            documentCount: 0,
+          };
+          currentLevel.push(existing);
+        }
+        currentLevel = existing.children;
+      });
+    });
+    
+    return docCategories;
+  }, [documents, emptyCategories]);
   const extensions = useMemo(() => getUniqueExtensions(documents), [documents]);
   const uncategorizedCount = useMemo(
     () => documents.filter((d) => !d.category).length,
@@ -112,6 +140,13 @@ export default function Documents() {
   // Category management
   const handleCreateCategory = (parentPath: string | null, name: string) => {
     const newPath = parentPath ? `${parentPath}/${name}` : name;
+    
+    // Add to empty categories if it doesn't exist in documents
+    const existsInDocs = documents.some(d => d.category === newPath || d.category?.startsWith(newPath + '/'));
+    if (!existsInDocs && !emptyCategories.includes(newPath)) {
+      setEmptyCategories(prev => [...prev, newPath]);
+    }
+    
     toast({
       title: "Mapp skapad",
       description: `Mappen "${name}" har skapats${parentPath ? ` under "${parentPath.split('/').pop()}"` : ""}.`,
@@ -137,6 +172,13 @@ export default function Documents() {
       await updateCategory.mutateAsync({ documentId: doc.id, category: newCategory });
     }
 
+    // Also update empty categories
+    setEmptyCategories(prev => prev.map(c => {
+      if (c === oldPath) return newPath;
+      if (c.startsWith(oldPath + '/')) return c.replace(oldPath, newPath);
+      return c;
+    }));
+
     if (selectedCategory === oldPath) {
       setSelectedCategory(newPath);
     } else if (selectedCategory?.startsWith(oldPath + '/')) {
@@ -156,6 +198,9 @@ export default function Documents() {
     for (const doc of docsToUpdate) {
       await updateCategory.mutateAsync({ documentId: doc.id, category: '' });
     }
+
+    // Remove from empty categories
+    setEmptyCategories(prev => prev.filter(c => c !== path && !c.startsWith(path + '/')));
 
     if (selectedCategory === path || selectedCategory?.startsWith(path + '/')) {
       setSelectedCategory(null);
