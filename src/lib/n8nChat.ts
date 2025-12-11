@@ -69,15 +69,34 @@ export function parseMarkdown(text: string): string {
 
   let html = text;
   
+  // Extrahera PDF-länkar från klickbara bilder innan vi tar bort dem
+  const pdfLinks: { title: string; url: string }[] = [];
+  const clickableImageRegex = /\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)/g;
+  let match;
+  while ((match = clickableImageRegex.exec(text)) !== null) {
+    const [, alt, , pdfUrl] = match;
+    // Extrahera filnamn och sida från alt-texten eller URL:en
+    const pageMatch = pdfUrl.match(/#page=(\d+)/);
+    const filenameMatch = alt.match(/([^/]+\.pdf)/i) || pdfUrl.match(/([^/]+\.pdf)/i);
+    if (filenameMatch) {
+      const filename = filenameMatch[1];
+      const page = pageMatch ? pageMatch[1] : null;
+      const title = page ? `${filename} (sida ${page})` : filename;
+      pdfLinks.push({ title, url: pdfUrl });
+    }
+  }
+  
   // Ta bort bilder (visas separat i ImagePanel)
   html = html.replace(/\[!\[([^\]]*)\]\(([^)]+)\)\]\(([^)]+)\)\s*/g, '');
   html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)\s*/g, '');
   html = html.replace(/\n{3,}/g, '\n\n');
 
   // Skydda markdown-länkar
-  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => 
-    addPlaceholder(`<a href="${u}" target="_blank" rel="noopener" class="text-primary underline hover:no-underline">${t}</a>`)
-  );
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t, u) => {
+    // Validera URL-protokoll för säkerhet
+    if (!/^https?:\/\//i.test(u)) return t;
+    return addPlaceholder(`<a href="${u}" target="_blank" rel="noopener" class="text-primary underline hover:no-underline">${t}</a>`);
+  });
   // Skydda råa URLs
   html = html.replace(/https?:\/\/[^\s<>"]+/g, (m) => 
     addPlaceholder(`<a href="${m}" target="_blank" rel="noopener" class="text-primary underline hover:no-underline">${m}</a>`)
@@ -98,6 +117,15 @@ export function parseMarkdown(text: string): string {
   placeholders.forEach((c, i) => { 
     html = html.replace(`§§§PLACEHOLDER_${i}§§§`, c); 
   });
+  
+  // Lägg till PDF-länkar längst ner om det finns några
+  if (pdfLinks.length > 0) {
+    const pdfLinksHtml = pdfLinks.map(link => 
+      `<a href="${link.url}" target="_blank" rel="noopener" class="text-primary underline hover:no-underline">PDF: ${link.title}</a>`
+    ).join('<br />');
+    html = html.trim() + `<br /><br /><span class="text-xs opacity-80">${pdfLinksHtml}</span>`;
+  }
+  
   return html;
 }
 
