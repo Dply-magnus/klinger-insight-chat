@@ -55,7 +55,6 @@ export function KlingerChat() {
       <main className="flex-1 flex flex-col min-w-0">
         <PageHeader
           title="KLINGER Produktassistent"
-          subtitle="Online"
           icon={<Bot className="w-5 h-5 text-primary" />}
         />
         
@@ -77,7 +76,6 @@ export function KlingerChat() {
                   htmlContent={message.htmlContent}
                   isSelected={message.id === selectedMessageId}
                   onClick={() => handleMessageClick(message)}
-                  hasImages={!!message.images?.length}
                 />
               </div>
             ))}
