@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { DocumentStatus } from "@/lib/documentTypes";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, Loader2 } from "lucide-react";
 
 interface StatusBadgeProps {
   status: DocumentStatus;
@@ -21,6 +21,11 @@ const statusConfig: Record<DocumentStatus, {
     label: "Väntar",
     className: "bg-yellow-500/20 text-yellow-600 border-yellow-500/30",
     icon: <Clock className="w-3 h-3" />,
+  },
+  processing: {
+    label: "Bearbetas",
+    className: "bg-blue-500/20 text-blue-600 border-blue-500/30",
+    icon: <Loader2 className="w-3 h-3 animate-spin" />,
   },
   inactive: {
     label: "Inaktiv",

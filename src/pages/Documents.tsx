@@ -65,6 +65,7 @@ export default function Documents() {
     createCategory,
     deleteCategory: deleteCategoryMutation,
     renameCategory: renameCategoryMutation,
+    sendToN8n,
   } = useDocumentMutations();
 
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
@@ -433,19 +434,23 @@ export default function Documents() {
     if (!doc) return;
 
     try {
-      await updateStatus.mutateAsync({
+      await sendToN8n.mutateAsync({
         documentId: documentToApprove,
         versionId: doc.currentVersion.id,
-        status: 'active',
+        title: doc.title,
+        filename: doc.filename,
+        category: doc.category || '',
+        storagePath: doc.storagePath || '',
       });
       setApproveModalOpen(false);
       setDocumentToApprove(null);
       toast({
         title: "Dokument godkänt",
-        description: "Dokumentet har aktiverats och skickats till n8n för inläsning. (Demo)",
+        description: "Dokumentet skickas nu till n8n för vektorindexering.",
       });
-    } catch {
-      toast({ title: "Kunde inte godkänna", variant: "destructive" });
+    } catch (error) {
+      console.error('Error sending to n8n:', error);
+      toast({ title: "Kunde inte skicka till n8n", variant: "destructive" });
     }
   };
 
