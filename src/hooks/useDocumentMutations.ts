@@ -308,6 +308,56 @@ export function useDocumentMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-categories"] }),
   });
 
+  // Send document to n8n for processing
+  const sendToN8n = useMutation({
+    mutationFn: async ({
+      documentId,
+      versionId,
+      title,
+      filename,
+      category,
+      storagePath,
+    }: {
+      documentId: string;
+      versionId: string;
+      title: string;
+      filename: string;
+      category: string;
+      storagePath: string;
+    }) => {
+      // Get the public URL for the file
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(storagePath);
+
+      // Update status to "processing"
+      await supabase
+        .from('klinger_document_versions')
+        .update({ status: 'processing' })
+        .eq('id', versionId);
+
+      await supabase
+        .from('klinger_documents')
+        .update({ status: 'processing' })
+        .eq('id', documentId);
+
+      // Call Edge Function to send to n8n
+      const { error } = await supabase.functions.invoke('process-document', {
+        body: {
+          documentId,
+          title,
+          filename,
+          category,
+          fileUrl: urlData.publicUrl,
+          version: versionId,
+        },
+      });
+
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
+  });
+
   return {
     uploadDocument,
     replaceDocument,
@@ -318,5 +368,6 @@ export function useDocumentMutations() {
     createCategory,
     deleteCategory,
     renameCategory,
+    sendToN8n,
   };
 }

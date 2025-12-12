@@ -136,6 +136,7 @@ export function DocumentList({
       all: documents.length,
       active: 0,
       pending: 0,
+      processing: 0,
       inactive: 0,
     };
 
