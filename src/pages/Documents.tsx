@@ -442,7 +442,7 @@ export default function Documents() {
           <LogIn className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
           <p className="text-muted-foreground mb-2">Logga in för att ladda upp dokument</p>
           <Button variant="outline" size="sm" asChild>
-            <a href="/auth">Logga in</a>
+            <a href="/auth"><LogIn className="w-4 h-4 mr-1" />Logga in</a>
           </Button>
         </div>
       );
