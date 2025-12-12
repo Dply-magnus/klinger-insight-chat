@@ -1,6 +1,6 @@
 import { FileText, Calendar, Layers, Folder, Download } from "lucide-react";
 import { Document, formatDate, CategoryNode } from "@/lib/documentTypes";
-import { supabase } from "@/integrations/supabase/client";
+import { getStoragePublicUrl } from "@/lib/storageUtils";
 import { StatusBadge } from "./StatusBadge";
 import { VersionHistory } from "./VersionHistory";
 import { CategorySelect } from "./CategorySelect";
@@ -30,7 +30,7 @@ export function DocumentPreviewPanel({
   }
 
   const downloadUrl = document.storagePath
-    ? supabase.storage.from('uploads').getPublicUrl(document.storagePath).data.publicUrl
+    ? getStoragePublicUrl('uploads', document.storagePath)
     : null;
 
   return (
