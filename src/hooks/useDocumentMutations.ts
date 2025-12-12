@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { getStoragePublicUrl } from "@/lib/storageUtils";
 
 async function uploadFileToStorage(file: File, userId: string): Promise<string> {
   const timestamp = Date.now();
@@ -325,10 +326,8 @@ export function useDocumentMutations() {
       category: string;
       storagePath: string;
     }) => {
-      // Get the public URL for the file
-      const { data: urlData } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(storagePath);
+      // Get the public URL for the file using custom domain
+      const fileUrl = getStoragePublicUrl('uploads', storagePath);
 
       // Update status to "processing"
       await supabase
@@ -348,7 +347,7 @@ export function useDocumentMutations() {
           title,
           filename,
           category,
-          fileUrl: urlData.publicUrl,
+          fileUrl,
           version: versionId,
         },
       });

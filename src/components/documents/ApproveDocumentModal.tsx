@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FileText, Send, Check, X, Download } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getStoragePublicUrl } from "@/lib/storageUtils";
 import { StatusBadge } from "./StatusBadge";
 
 interface ApproveDocumentModalProps {
@@ -32,7 +32,7 @@ export function ApproveDocumentModal({
   if (!document) return null;
 
   const downloadUrl = document.storagePath
-    ? supabase.storage.from('uploads').getPublicUrl(document.storagePath).data.publicUrl
+    ? getStoragePublicUrl('uploads', document.storagePath)
     : null;
 
   return (

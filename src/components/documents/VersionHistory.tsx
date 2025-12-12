@@ -2,7 +2,7 @@ import { RotateCcw, CheckCircle2, Clock, XCircle, Download } from "lucide-react"
 import { Document, DocumentVersion, formatDate } from "@/lib/documentTypes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
+import { getStoragePublicUrl } from "@/lib/storageUtils";
 
 interface VersionHistoryProps {
   document: Document;
@@ -19,10 +19,8 @@ export function VersionHistory({ document, onRollback }: VersionHistoryProps) {
   const currentVersionId = document.currentVersion.id;
 
   const handleDownload = (storagePath: string) => {
-    const { data } = supabase.storage.from('uploads').getPublicUrl(storagePath);
-    if (data?.publicUrl) {
-      window.open(data.publicUrl, '_blank');
-    }
+    const url = getStoragePublicUrl('uploads', storagePath);
+    window.open(url, '_blank');
   };
 
   return (
