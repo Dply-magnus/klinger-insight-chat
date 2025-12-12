@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      klinger_categories: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          path: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          path: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          path?: string
+        }
+        Relationships: []
+      }
       klinger_document_versions: {
         Row: {
           changelog: string | null
