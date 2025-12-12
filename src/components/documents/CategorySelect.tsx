@@ -52,7 +52,7 @@ export function CategorySelect({
         >
           <div className="flex items-center gap-2 truncate">
             <Folder className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-            <span className={cn(!value && "text-foreground/70")}>
+            <span className={cn(!value && "text-foreground/80")}>
               {displayValue}
             </span>
           </div>

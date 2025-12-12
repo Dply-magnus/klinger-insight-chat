@@ -199,16 +199,13 @@ function FileItem({
       </div>
 
       {/* Category selector */}
-      <div className="flex items-center gap-2 pl-11">
-        <Folder className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-        <div className="flex-1">
-          <CategorySelect
-            value={staged.category}
-            categories={categories}
-            onChange={(cat) => onUpdateCategory(index, cat)}
-            placeholder="Välj kategori (valfritt)"
-          />
-        </div>
+      <div className="pl-11">
+        <CategorySelect
+          value={staged.category}
+          categories={categories}
+          onChange={(cat) => onUpdateCategory(index, cat)}
+          placeholder="Välj kategori (valfritt)"
+        />
       </div>
     </div>
   );
