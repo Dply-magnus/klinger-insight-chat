@@ -11,6 +11,7 @@ export interface Document {
   id: string;
   title: string;
   filename: string;
+  storagePath: string;
   category?: string; // Path-based: "Produkter/Ventiler/Kulventiler"
   currentVersion: DocumentVersion;
   versions: DocumentVersion[];
