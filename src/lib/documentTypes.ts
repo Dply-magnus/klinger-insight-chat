@@ -1,4 +1,4 @@
-export type DocumentStatus = "active" | "pending" | "inactive" | "deleted";
+export type DocumentStatus = "active" | "pending" | "inactive";
 
 export interface DocumentVersion {
   id: string;

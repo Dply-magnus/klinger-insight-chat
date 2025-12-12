@@ -75,7 +75,6 @@ export default function Documents() {
   const [extensionFilter, setExtensionFilter] = useState<string | "all">("all");
   const [sortField, setSortField] = useState<SortField>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
-  const [showDeleted, setShowDeleted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Upload state
@@ -139,7 +138,6 @@ export default function Documents() {
     setSearchQuery("");
     setStatusFilter("all");
     setExtensionFilter("all");
-    setShowDeleted(false);
     setSelectedCategory(null);
   };
 
@@ -368,18 +366,15 @@ export default function Documents() {
   };
 
   const handleDelete = async (id: string) => {
-    const doc = documents.find(d => d.id === id);
-    if (!doc) return;
     try {
-      await updateStatus.mutateAsync({
-        documentId: id,
-        versionId: doc.currentVersion.id,
-        status: 'deleted',
-      });
+      await deleteDocument.mutateAsync(id);
+      if (selectedDocumentId === id) {
+        setSelectedDocumentId(null);
+      }
       setDeleteConfirm(null);
       toast({
         title: "Dokument raderat",
-        description: "Dokumentet kan återställas från listan.",
+        description: "Dokumentet har tagits bort permanent.",
       });
     } catch {
       toast({ title: "Kunde inte radera", variant: "destructive" });
@@ -539,7 +534,6 @@ export default function Documents() {
                     sortDirection={sortDirection}
                     selectedCategory={selectedCategory}
                     extensions={extensions}
-                    showDeleted={showDeleted}
                     onSelectDocument={handleSelectDocument}
                     onSearchChange={setSearchQuery}
                     onStatusFilterChange={setStatusFilter}
@@ -549,7 +543,6 @@ export default function Documents() {
                       setSortDirection(dir);
                     }}
                     onCategoryChange={setSelectedCategory}
-                    onShowDeletedChange={setShowDeleted}
                     onClearFilters={handleClearFilters}
                     onActivate={handleActivate}
                     onDeactivate={handleDeactivate}
@@ -627,7 +620,6 @@ export default function Documents() {
                 sortDirection={sortDirection}
                 selectedCategory={selectedCategory}
                 extensions={extensions}
-                showDeleted={showDeleted}
                 onSelectDocument={handleSelectDocument}
                 onSearchChange={setSearchQuery}
                 onStatusFilterChange={setStatusFilter}
@@ -637,7 +629,6 @@ export default function Documents() {
                   setSortDirection(dir);
                 }}
                 onCategoryChange={setSelectedCategory}
-                onShowDeletedChange={setShowDeleted}
                 onClearFilters={handleClearFilters}
                 onActivate={handleActivate}
                 onDeactivate={handleDeactivate}

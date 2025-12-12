@@ -83,7 +83,7 @@ export function DocumentRow({
           
           <DropdownMenuSeparator />
           
-          {status === "inactive" || status === "deleted" ? (
+          {status === "inactive" ? (
             <DropdownMenuItem onClick={onActivate} className="gap-2 text-green-600">
               <Power className="w-4 h-4" />
               Aktivera
@@ -95,12 +95,10 @@ export function DocumentRow({
             </DropdownMenuItem>
           )}
           
-          {status !== "deleted" && (
-            <DropdownMenuItem onClick={onDelete} className="gap-2 text-destructive">
-              <Trash2 className="w-4 h-4" />
-              Radera
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem onClick={onDelete} className="gap-2 text-destructive">
+            <Trash2 className="w-4 h-4" />
+            Radera
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

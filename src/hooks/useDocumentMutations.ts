@@ -132,12 +132,12 @@ export function useDocumentMutations() {
     mutationFn: async ({
       documentId,
       versionId,
-      status,
-    }: {
-      documentId: string;
-      versionId: string;
-      status: 'active' | 'inactive' | 'deleted';
-    }) => {
+    status,
+  }: {
+    documentId: string;
+    versionId: string;
+    status: 'active' | 'inactive';
+  }) => {
       await supabase
         .from('klinger_document_versions')
         .update({ status })
@@ -203,20 +203,24 @@ export function useDocumentMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
   });
 
-  // Soft delete document (mark as deleted instead of permanent removal)
+  // Hard delete document (permanent removal)
   const deleteDocument = useMutation({
     mutationFn: async (documentId: string) => {
-      // Mark all versions as deleted
-      await supabase
+      // Delete all versions first (due to FK constraint)
+      const { error: versionsError } = await supabase
         .from('klinger_document_versions')
-        .update({ status: 'deleted' })
+        .delete()
         .eq('document_id', documentId);
 
-      // Mark the document as deleted
-      await supabase
+      if (versionsError) throw versionsError;
+
+      // Delete the document permanently
+      const { error: docError } = await supabase
         .from('klinger_documents')
-        .update({ status: 'deleted' })
+        .delete()
         .eq('id', documentId);
+
+      if (docError) throw docError;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
   });

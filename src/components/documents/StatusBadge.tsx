@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { DocumentStatus } from "@/lib/documentTypes";
-import { CheckCircle2, Clock, XCircle, Trash2 } from "lucide-react";
+import { CheckCircle2, Clock, XCircle } from "lucide-react";
 
 interface StatusBadgeProps {
   status: DocumentStatus;
@@ -26,11 +26,6 @@ const statusConfig: Record<DocumentStatus, {
     label: "Inaktiv",
     className: "bg-muted text-muted-foreground border-border",
     icon: <XCircle className="w-3 h-3" />,
-  },
-  deleted: {
-    label: "Raderad",
-    className: "bg-destructive/20 text-destructive border-destructive/30",
-    icon: <Trash2 className="w-3 h-3" />,
   },
 };
 
