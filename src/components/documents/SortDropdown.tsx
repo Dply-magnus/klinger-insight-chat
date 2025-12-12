@@ -39,10 +39,10 @@ export function SortDropdown({ field, direction, onChange }: SortDropdownProps) 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2 group">
           <ArrowUpDown className="w-4 h-4" />
           <span className="hidden sm:inline">{currentLabel}</span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground group-hover:text-white transition-colors">
             ({direction === "asc" ? "↑" : "↓"})
           </span>
           <ChevronDown className="w-3 h-3" />
