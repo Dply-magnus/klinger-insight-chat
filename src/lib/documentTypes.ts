@@ -3,6 +3,7 @@ export type DocumentStatus = "active" | "pending" | "inactive" | "processing";
 export interface DocumentVersion {
   id: string;
   filename: string;
+  storagePath: string;
   uploadedAt: Date;
   status: DocumentStatus;
 }

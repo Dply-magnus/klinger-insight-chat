@@ -19,6 +19,7 @@ function mapSupabaseToDocument(
   const mapVersion = (v: KlingerDocumentVersion) => ({
     id: v.id,
     filename: v.storage_path.split('/').pop() || doc.filename,
+    storagePath: v.storage_path,
     uploadedAt: new Date(v.created_at),
     status: v.status as DocumentStatus,
   });
@@ -33,6 +34,7 @@ function mapSupabaseToDocument(
     currentVersion: currentVersion ? mapVersion(currentVersion) : {
       id: doc.id,
       filename: doc.filename,
+      storagePath: doc.storage_path,
       uploadedAt: new Date(doc.created_at),
       status: doc.status as DocumentStatus,
     },

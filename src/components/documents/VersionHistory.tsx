@@ -1,7 +1,8 @@
-import { RotateCcw, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { RotateCcw, CheckCircle2, Clock, XCircle, Download } from "lucide-react";
 import { Document, DocumentVersion, formatDate } from "@/lib/documentTypes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VersionHistoryProps {
   document: Document;
@@ -16,6 +17,13 @@ const statusIcons = {
 
 export function VersionHistory({ document, onRollback }: VersionHistoryProps) {
   const currentVersionId = document.currentVersion.id;
+
+  const handleDownload = (storagePath: string) => {
+    const { data } = supabase.storage.from('uploads').getPublicUrl(storagePath);
+    if (data?.publicUrl) {
+      window.open(data.publicUrl, '_blank');
+    }
+  };
 
   return (
     <div className="p-4">
@@ -63,9 +71,12 @@ export function VersionHistory({ document, onRollback }: VersionHistoryProps) {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-panel-muted mt-0.5 truncate">
+                    <button
+                      onClick={() => handleDownload(version.storagePath)}
+                      className="text-xs text-primary hover:text-primary/80 hover:underline mt-0.5 truncate text-left cursor-pointer transition-colors"
+                    >
                       {version.filename}
-                    </p>
+                    </button>
                   </div>
                   
                   {!isCurrent && (
