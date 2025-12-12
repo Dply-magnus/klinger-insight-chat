@@ -58,7 +58,7 @@ export function SortDropdown({ field, direction, onChange }: SortDropdownProps) 
             {option.label}
             {option.field === field && (
               <span className="ml-auto text-xs text-muted-foreground">
-                {direction === "asc" ? "↑ stigande" : "↓ fallande"}
+                {direction === "asc" ? "↓ fallande" : "↑ stigande"}
               </span>
             )}
           </DropdownMenuItem>
