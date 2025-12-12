@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Send, Check, X, Download } from "lucide-react";
+import { FileText, Send, X, Download } from "lucide-react";
 import { getStoragePublicUrl } from "@/lib/storageUtils";
 import { StatusBadge } from "./StatusBadge";
 
@@ -17,7 +17,7 @@ interface ApproveDocumentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onApproveAndSend: () => void;
-  onApproveOnly: () => void;
+  
   onReject: () => void;
 }
 
@@ -26,7 +26,7 @@ export function ApproveDocumentModal({
   open,
   onOpenChange,
   onApproveAndSend,
-  onApproveOnly,
+  
   onReject,
 }: ApproveDocumentModalProps) {
   if (!document) return null;
@@ -103,14 +103,6 @@ export function ApproveDocumentModal({
           >
             <Send className="w-4 h-4 mr-2" />
             Godkänn & skicka till n8n
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={onApproveOnly}
-            className="w-full"
-          >
-            <Check className="w-4 h-4 mr-2" />
-            Endast aktivera
           </Button>
           <div className="flex gap-2 w-full">
             <Button
