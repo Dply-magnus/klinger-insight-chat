@@ -3,7 +3,6 @@ import { Document, DocumentStatus, getFileExtension } from "@/lib/documentTypes"
 import { DocumentSearch } from "./DocumentSearch";
 import { SortDropdown, SortField, SortDirection } from "./SortDropdown";
 import { ExtensionFilter } from "./ExtensionFilter";
-import { CategoryBreadcrumb } from "./CategoryBreadcrumb";
 import { DocumentRow } from "./DocumentRow";
 import { FileText, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -159,14 +158,6 @@ export function DocumentList({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Breadcrumb */}
-      <div className="px-4 pt-3 pb-2 border-b border-border">
-        <CategoryBreadcrumb
-          category={selectedCategory}
-          onNavigate={onCategoryChange}
-        />
-      </div>
-
       {/* Search and controls */}
       <div className="p-4 space-y-3 border-b border-border">
         <div className="flex items-center gap-2">
