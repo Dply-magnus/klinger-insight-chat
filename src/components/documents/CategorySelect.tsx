@@ -71,7 +71,7 @@ export function CategorySelect({
                 : "hover:bg-muted"
             )}
           >
-            <span className="text-muted-foreground">Ingen kategori</span>
+            <span className={cn(!value ? "text-white" : "text-muted-foreground")}>Ingen kategori</span>
           </button>
 
           {/* Existing categories */}
