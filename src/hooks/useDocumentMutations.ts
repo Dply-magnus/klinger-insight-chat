@@ -151,15 +151,45 @@ export function useDocumentMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
   });
 
-  // Update category
+  // Update category and ensure category hierarchy is persisted
   const updateCategory = useMutation({
-    mutationFn: async ({ documentId, category }: { documentId: string; category: string }) => {
+    mutationFn: async ({ documentId, category, userId }: { 
+      documentId: string; 
+      category: string;
+      userId: string;
+    }) => {
+      // Update the document's category
       await supabase
         .from('klinger_documents')
         .update({ category })
         .eq('id', documentId);
+
+      // Ensure category and all parent categories exist in database
+      if (category) {
+        const segments = category.split("/");
+        let currentPath = "";
+        
+        for (const segment of segments) {
+          currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+          
+          // Upsert category (insert if doesn't exist, ignore if it does)
+          await supabase
+            .from('klinger_categories')
+            .upsert({
+              path: currentPath,
+              name: segment,
+              created_by: userId,
+            }, { 
+              onConflict: 'path',
+              ignoreDuplicates: true 
+            });
+        }
+      }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["klinger-documents"] });
+      queryClient.invalidateQueries({ queryKey: ["klinger-categories"] });
+    },
   });
 
   // Rollback to previous version
