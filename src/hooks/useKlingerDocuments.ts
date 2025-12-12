@@ -50,6 +50,7 @@ export function useKlingerDocuments() {
       const { data: docs, error: docsError } = await supabase
         .from("klinger_documents")
         .select("*")
+        .neq("status", "deleted")
         .order("created_at", { ascending: false });
 
       if (docsError) throw docsError;
