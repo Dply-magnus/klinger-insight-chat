@@ -7,6 +7,8 @@ import { UploadPreview } from "@/components/documents/UploadPreview";
 import { DocumentPreviewPanel } from "@/components/documents/DocumentPreviewPanel";
 import { CategoryTree } from "@/components/documents/CategoryTree";
 import { CategoryBreadcrumb } from "@/components/documents/CategoryBreadcrumb";
+import { DocumentSummary } from "@/components/documents/DocumentSummary";
+import { ApproveDocumentModal } from "@/components/documents/ApproveDocumentModal";
 import { useKlingerDocuments } from "@/hooks/useKlingerDocuments";
 import { useDocumentMutations } from "@/hooks/useDocumentMutations";
 import { useKlingerCategories } from "@/hooks/useKlingerCategories";
@@ -87,10 +89,19 @@ export default function Documents() {
     docId: string;
     versionId: string;
   } | null>(null);
+  
+  // Approve modal state
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [documentToApprove, setDocumentToApprove] = useState<string | null>(null);
 
   const selectedDocument = useMemo(
     () => documents.find((d) => d.id === selectedDocumentId) || null,
     [documents, selectedDocumentId]
+  );
+
+  const documentToApproveObj = useMemo(
+    () => documents.find((d) => d.id === documentToApprove) || null,
+    [documents, documentToApprove]
   );
 
   const categories = useMemo(() => {
@@ -410,6 +421,72 @@ export default function Documents() {
     }
   };
 
+  // Approve handlers
+  const handleOpenApproveModal = (id: string) => {
+    setDocumentToApprove(id);
+    setApproveModalOpen(true);
+  };
+
+  const handleApproveAndSend = async () => {
+    if (!documentToApprove) return;
+    const doc = documents.find(d => d.id === documentToApprove);
+    if (!doc) return;
+
+    try {
+      await updateStatus.mutateAsync({
+        documentId: documentToApprove,
+        versionId: doc.currentVersion.id,
+        status: 'active',
+      });
+      setApproveModalOpen(false);
+      setDocumentToApprove(null);
+      toast({
+        title: "Dokument godkänt",
+        description: "Dokumentet har aktiverats och skickats till n8n för inläsning. (Demo)",
+      });
+    } catch {
+      toast({ title: "Kunde inte godkänna", variant: "destructive" });
+    }
+  };
+
+  const handleApproveOnly = async () => {
+    if (!documentToApprove) return;
+    const doc = documents.find(d => d.id === documentToApprove);
+    if (!doc) return;
+
+    try {
+      await updateStatus.mutateAsync({
+        documentId: documentToApprove,
+        versionId: doc.currentVersion.id,
+        status: 'active',
+      });
+      setApproveModalOpen(false);
+      setDocumentToApprove(null);
+      toast({ title: "Dokument aktiverat" });
+    } catch {
+      toast({ title: "Kunde inte aktivera", variant: "destructive" });
+    }
+  };
+
+  const handleReject = async () => {
+    if (!documentToApprove) return;
+    const doc = documents.find(d => d.id === documentToApprove);
+    if (!doc) return;
+
+    try {
+      await updateStatus.mutateAsync({
+        documentId: documentToApprove,
+        versionId: doc.currentVersion.id,
+        status: 'inactive',
+      });
+      setApproveModalOpen(false);
+      setDocumentToApprove(null);
+      toast({ title: "Dokument avslaget", description: "Dokumentet har markerats som inaktivt." });
+    } catch {
+      toast({ title: "Kunde inte avslå", variant: "destructive" });
+    }
+  };
+
   // Loading state
   if (isLoading || authLoading || categoriesLoading) {
     return (
@@ -497,6 +574,13 @@ export default function Documents() {
               />
 
               <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Summary cards */}
+                <DocumentSummary
+                  documents={documents}
+                  onFilterClick={setStatusFilter}
+                  activeFilter={statusFilter}
+                />
+
                 {/* Breadcrumb bar with upload button */}
                 <div className="px-4 py-3 border-b border-border flex items-center justify-between gap-4">
                   <CategoryBreadcrumb
@@ -548,6 +632,7 @@ export default function Documents() {
                     onActivate={handleActivate}
                     onDeactivate={handleDeactivate}
                     onDelete={(id) => setDeleteConfirm(id)}
+                    onApprove={handleOpenApproveModal}
                   />
                 </div>
               </div>
@@ -630,14 +715,15 @@ export default function Documents() {
                   setSortDirection(dir);
                 }}
                 onCategoryChange={setSelectedCategory}
-                onClearFilters={handleClearFilters}
-                onActivate={handleActivate}
-                onDeactivate={handleDeactivate}
-                onDelete={(id) => setDeleteConfirm(id)}
-              />
-            </div>
-          </div>
-        </main>
+                    onClearFilters={handleClearFilters}
+                    onActivate={handleActivate}
+                    onDeactivate={handleDeactivate}
+                    onDelete={(id) => setDeleteConfirm(id)}
+                    onApprove={handleOpenApproveModal}
+                  />
+                </div>
+              </div>
+            </main>
 
         {/* Mobile Category Drawer */}
         <Sheet open={mobileCategoryDrawerOpen} onOpenChange={setMobileCategoryDrawerOpen}>
@@ -742,6 +828,16 @@ export default function Documents() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Approve document modal */}
+      <ApproveDocumentModal
+        document={documentToApproveObj}
+        open={approveModalOpen}
+        onOpenChange={setApproveModalOpen}
+        onApproveAndSend={handleApproveAndSend}
+        onApproveOnly={handleApproveOnly}
+        onReject={handleReject}
+      />
     </div>
   );
 }
