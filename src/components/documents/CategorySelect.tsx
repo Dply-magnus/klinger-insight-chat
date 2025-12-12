@@ -139,7 +139,7 @@ function CategorySelectItem({
       <button
         onClick={() => onSelect(category.path)}
         className={cn(
-          "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
+          "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors group",
           isSelected
             ? "bg-accent text-accent-foreground"
             : "hover:bg-muted"
@@ -165,7 +165,12 @@ function CategorySelectItem({
           <span className="w-4" />
         )}
 
-        <Folder className="w-4 h-4 text-muted-foreground" />
+        <Folder className={cn(
+          "w-4 h-4 transition-colors",
+          isSelected 
+            ? "text-white" 
+            : "text-muted-foreground group-hover:text-foreground"
+        )} />
         <span className="flex-1 text-left truncate">{category.name}</span>
       </button>
 
