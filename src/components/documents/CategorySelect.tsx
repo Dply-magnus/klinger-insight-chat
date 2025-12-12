@@ -142,7 +142,7 @@ function CategorySelectItem({
           "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors group",
           isSelected
             ? "bg-accent text-accent-foreground"
-            : "hover:bg-muted"
+            : "hover:bg-accent hover:text-accent-foreground"
         )}
         style={{ paddingLeft: `${12 + level * 16}px` }}
       >
@@ -168,8 +168,8 @@ function CategorySelectItem({
         <Folder className={cn(
           "w-4 h-4 transition-colors",
           isSelected 
-            ? "text-white" 
-            : "text-muted-foreground group-hover:text-foreground"
+            ? "text-accent-foreground" 
+            : "text-muted-foreground group-hover:text-accent-foreground"
         )} />
         <span className="flex-1 text-left truncate">{category.name}</span>
       </button>
