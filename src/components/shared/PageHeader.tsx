@@ -98,7 +98,7 @@ export function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
                 <p className="text-xs text-muted-foreground">Inloggad</p>
               </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive focus:text-white data-[highlighted]:bg-destructive data-[highlighted]:text-white">
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:bg-destructive focus:text-white data-[highlighted]:bg-destructive data-[highlighted]:text-white [&_svg]:data-[highlighted]:text-white focus:[&_svg]:text-white">
                 <LogOut className="w-4 h-4 mr-2" />
                 Logga ut
               </DropdownMenuItem>
