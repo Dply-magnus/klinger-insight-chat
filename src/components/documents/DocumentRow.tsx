@@ -1,4 +1,5 @@
-import { FileText, MoreVertical, Eye, RotateCcw, Trash2, Power, PowerOff } from "lucide-react";
+import { FileText, MoreVertical, Eye, RotateCcw, Trash2, Power, PowerOff, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Document, formatDate } from "@/lib/documentTypes";
 import { StatusBadge } from "./StatusBadge";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ interface DocumentRowProps {
   onDeactivate: () => void;
   onDelete: () => void;
   onViewVersions: () => void;
+  onApprove?: () => void;
 }
 
 export function DocumentRow({
@@ -28,6 +30,7 @@ export function DocumentRow({
   onDeactivate,
   onDelete,
   onViewVersions,
+  onApprove,
 }: DocumentRowProps) {
   const { title, filename, currentVersion } = document;
   const status = currentVersion.status;
@@ -57,6 +60,22 @@ export function DocumentRow({
           </span>
         )}
       </div>
+
+      {/* Approve button for pending documents */}
+      {status === "pending" && onApprove && (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={(e) => {
+            e.stopPropagation();
+            onApprove();
+          }}
+          className="shrink-0 border-yellow-500/50 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-700"
+        >
+          <CheckCircle className="w-4 h-4 mr-1" />
+          Granska
+        </Button>
+      )}
 
       {/* Actions */}
       <DropdownMenu>

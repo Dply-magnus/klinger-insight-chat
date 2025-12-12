@@ -6,6 +6,7 @@ import { ExtensionFilter } from "./ExtensionFilter";
 import { DocumentRow } from "./DocumentRow";
 import { FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { StatusFilter } from "./StatusFilter";
 
 interface DocumentListProps {
   documents: Document[];
@@ -27,6 +28,7 @@ interface DocumentListProps {
   onActivate: (id: string) => void;
   onDeactivate: (id: string) => void;
   onDelete: (id: string) => void;
+  onApprove?: (id: string) => void;
 }
 
 export function DocumentList({
@@ -49,6 +51,7 @@ export function DocumentList({
   onActivate,
   onDeactivate,
   onDelete,
+  onApprove,
 }: DocumentListProps) {
   // Check if any filters are active
   const hasActiveFilters = searchQuery || statusFilter !== "all" || extensionFilter !== "all";
@@ -158,6 +161,14 @@ export function DocumentList({
           />
         </div>
 
+        <div className="flex items-center justify-between gap-2">
+          <StatusFilter
+            selected={statusFilter}
+            onChange={onStatusFilterChange}
+            counts={counts}
+          />
+        </div>
+        
         <div className="flex items-center justify-between">
           <ExtensionFilter
             extensions={extensions}
@@ -199,6 +210,7 @@ export function DocumentList({
               onDeactivate={() => onDeactivate(doc.id)}
               onDelete={() => onDelete(doc.id)}
               onViewVersions={() => onSelectDocument(doc.id)}
+              onApprove={onApprove ? () => onApprove(doc.id) : undefined}
             />
           ))
         )}
