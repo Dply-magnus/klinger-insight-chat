@@ -1,5 +1,6 @@
-import { FileText, Calendar, Layers, Folder } from "lucide-react";
+import { FileText, Calendar, Layers, Folder, Download } from "lucide-react";
 import { Document, formatDate, CategoryNode } from "@/lib/documentTypes";
+import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "./StatusBadge";
 import { VersionHistory } from "./VersionHistory";
 import { CategorySelect } from "./CategorySelect";
@@ -28,6 +29,10 @@ export function DocumentPreviewPanel({
     );
   }
 
+  const downloadUrl = document.storagePath
+    ? supabase.storage.from('uploads').getPublicUrl(document.storagePath).data.publicUrl
+    : null;
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
@@ -40,9 +45,21 @@ export function DocumentPreviewPanel({
             <h2 className="font-semibold text-panel-foreground truncate">
               {document.title}
             </h2>
-            <p className="text-sm text-panel-muted truncate mt-0.5">
-              {document.filename}
-            </p>
+            {downloadUrl ? (
+              <a
+                href={downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline flex items-center gap-1 mt-0.5 truncate"
+              >
+                <Download className="w-3 h-3 flex-shrink-0" />
+                {document.filename}
+              </a>
+            ) : (
+              <p className="text-sm text-panel-muted truncate mt-0.5">
+                {document.filename}
+              </p>
+            )}
             <div className="mt-2">
               <StatusBadge status={document.currentVersion.status} size="md" />
             </div>
