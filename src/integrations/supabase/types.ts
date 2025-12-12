@@ -230,7 +230,12 @@ export type Database = {
       }
     }
     Enums: {
-      klinger_document_status: "active" | "pending" | "inactive" | "deleted"
+      klinger_document_status:
+        | "active"
+        | "pending"
+        | "inactive"
+        | "deleted"
+        | "processing"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -358,7 +363,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      klinger_document_status: ["active", "pending", "inactive", "deleted"],
+      klinger_document_status: [
+        "active",
+        "pending",
+        "inactive",
+        "deleted",
+        "processing",
+      ],
     },
   },
 } as const
