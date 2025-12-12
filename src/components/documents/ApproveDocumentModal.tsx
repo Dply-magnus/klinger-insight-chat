@@ -8,7 +8,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Send, Check, X } from "lucide-react";
+import { FileText, Send, Check, X, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "./StatusBadge";
 
 interface ApproveDocumentModalProps {
@@ -30,6 +31,10 @@ export function ApproveDocumentModal({
 }: ApproveDocumentModalProps) {
   if (!document) return null;
 
+  const downloadUrl = document.storagePath
+    ? supabase.storage.from('uploads').getPublicUrl(document.storagePath).data.publicUrl
+    : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -49,9 +54,21 @@ export function ApproveDocumentModal({
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1 min-w-0">
                 <h4 className="font-medium truncate">{document.title}</h4>
-                <p className="text-sm text-muted-foreground truncate">
-                  {document.filename}
-                </p>
+                {downloadUrl ? (
+                  <a
+                    href={downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline flex items-center gap-1 truncate"
+                  >
+                    <Download className="w-3 h-3 flex-shrink-0" />
+                    {document.filename}
+                  </a>
+                ) : (
+                  <p className="text-sm text-muted-foreground truncate">
+                    {document.filename}
+                  </p>
+                )}
               </div>
               <StatusBadge status={document.currentVersion.status} />
             </div>

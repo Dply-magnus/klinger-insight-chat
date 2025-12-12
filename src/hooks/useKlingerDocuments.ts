@@ -27,6 +27,7 @@ function mapSupabaseToDocument(
     id: doc.id,
     title: doc.name,
     filename: doc.filename,
+    storagePath: doc.storage_path,
     category: doc.category || undefined,
     createdAt: new Date(doc.created_at),
     currentVersion: currentVersion ? mapVersion(currentVersion) : {
