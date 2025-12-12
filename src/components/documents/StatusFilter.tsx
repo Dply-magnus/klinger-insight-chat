@@ -12,7 +12,6 @@ const filterOptions: { value: DocumentStatus | "all"; label: string }[] = [
   { value: "active", label: "Aktiva" },
   { value: "pending", label: "Väntar" },
   { value: "inactive", label: "Inaktiva" },
-  { value: "deleted", label: "Raderade" },
 ];
 
 export function StatusFilter({ selected, onChange, counts }: StatusFilterProps) {

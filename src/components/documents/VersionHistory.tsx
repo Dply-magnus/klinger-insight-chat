@@ -1,4 +1,4 @@
-import { RotateCcw, CheckCircle2, Clock, XCircle, Trash2 } from "lucide-react";
+import { RotateCcw, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Document, DocumentVersion, formatDate } from "@/lib/documentTypes";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ const statusIcons = {
   active: <CheckCircle2 className="w-4 h-4 text-green-600" />,
   pending: <Clock className="w-4 h-4 text-yellow-600" />,
   inactive: <XCircle className="w-4 h-4 text-muted-foreground" />,
-  deleted: <Trash2 className="w-4 h-4 text-destructive" />,
 };
 
 export function VersionHistory({ document, onRollback }: VersionHistoryProps) {
@@ -69,7 +68,7 @@ export function VersionHistory({ document, onRollback }: VersionHistoryProps) {
                     </p>
                   </div>
                   
-                  {!isCurrent && version.status !== "deleted" && (
+                  {!isCurrent && (
                     <Button
                       size="sm"
                       variant="ghost"

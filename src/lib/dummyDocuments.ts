@@ -4,7 +4,7 @@ const createVersion = (
   id: string,
   filename: string,
   daysAgo: number,
-  status: "active" | "pending" | "inactive" | "deleted"
+  status: "active" | "pending" | "inactive"
 ): DocumentVersion => ({
   id,
   filename,
@@ -108,9 +108,9 @@ export const dummyDocuments: Document[] = [
     id: "doc9",
     title: "Gammal prislista 2023",
     filename: "prislista_2023.pdf",
-    currentVersion: createVersion("v9-1", "prislista_2023.pdf", 180, "deleted"),
+    currentVersion: createVersion("v9-1", "prislista_2023.pdf", 180, "inactive"),
     versions: [
-      createVersion("v9-1", "prislista_2023.pdf", 180, "deleted"),
+      createVersion("v9-1", "prislista_2023.pdf", 180, "inactive"),
     ],
     createdAt: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000),
   },
