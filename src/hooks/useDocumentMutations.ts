@@ -221,6 +221,59 @@ export function useDocumentMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
   });
 
+  // Create category
+  const createCategory = useMutation({
+    mutationFn: async ({ path, name, userId }: { path: string; name: string; userId: string }) => {
+      const { error } = await supabase
+        .from('klinger_categories')
+        .insert({
+          path,
+          name,
+          created_by: userId,
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-categories"] }),
+  });
+
+  // Delete category
+  const deleteCategory = useMutation({
+    mutationFn: async (path: string) => {
+      // Delete this category and all subcategories
+      await supabase
+        .from('klinger_categories')
+        .delete()
+        .or(`path.eq.${path},path.like.${path}/%`);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-categories"] }),
+  });
+
+  // Rename category
+  const renameCategory = useMutation({
+    mutationFn: async ({ oldPath, newPath }: { oldPath: string; newPath: string }) => {
+      // Get all categories that need updating
+      const { data: categories } = await supabase
+        .from('klinger_categories')
+        .select('*')
+        .or(`path.eq.${oldPath},path.like.${oldPath}/%`);
+
+      if (categories && categories.length > 0) {
+        for (const cat of categories) {
+          const updatedPath = cat.path === oldPath 
+            ? newPath 
+            : cat.path.replace(oldPath + '/', newPath + '/');
+          
+          await supabase
+            .from('klinger_categories')
+            .update({ path: updatedPath, name: updatedPath.split('/').pop() || cat.name })
+            .eq('id', cat.id);
+        }
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-categories"] }),
+  });
+
   return {
     uploadDocument,
     replaceDocument,
@@ -228,5 +281,8 @@ export function useDocumentMutations() {
     updateCategory,
     rollbackVersion,
     deleteDocument,
+    createCategory,
+    deleteCategory,
+    renameCategory,
   };
 }
