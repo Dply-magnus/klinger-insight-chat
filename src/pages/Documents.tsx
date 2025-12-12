@@ -840,7 +840,6 @@ export default function Documents() {
         open={approveModalOpen}
         onOpenChange={setApproveModalOpen}
         onApproveAndSend={handleApproveAndSend}
-        onApproveOnly={handleApproveOnly}
         onReject={handleReject}
       />
     </div>
