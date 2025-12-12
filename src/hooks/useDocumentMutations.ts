@@ -203,19 +203,19 @@ export function useDocumentMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
   });
 
-  // Delete document
+  // Soft delete document (mark as deleted instead of permanent removal)
   const deleteDocument = useMutation({
     mutationFn: async (documentId: string) => {
-      // Delete all versions first
+      // Mark all versions as deleted
       await supabase
         .from('klinger_document_versions')
-        .delete()
+        .update({ status: 'deleted' })
         .eq('document_id', documentId);
 
-      // Delete the document
+      // Mark the document as deleted
       await supabase
         .from('klinger_documents')
-        .delete()
+        .update({ status: 'deleted' })
         .eq('id', documentId);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["klinger-documents"] }),
