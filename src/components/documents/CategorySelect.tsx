@@ -48,15 +48,18 @@ export function CategorySelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between text-left font-normal"
+          className="w-full justify-between text-left font-normal group"
         >
           <div className="flex items-center gap-2 truncate">
-            <Folder className="w-4 h-4 flex-shrink-0 text-muted-foreground" />
-            <span className={cn(!value && "text-foreground/80")}>
+            <Folder className="w-4 h-4 flex-shrink-0 text-muted-foreground group-hover:text-accent-foreground transition-colors" />
+            <span className={cn(
+              "transition-colors group-hover:text-accent-foreground",
+              !value && "text-foreground/80"
+            )}>
               {displayValue}
             </span>
           </div>
-          <ChevronDown className="w-4 h-4 flex-shrink-0 opacity-50" />
+          <ChevronDown className="w-4 h-4 flex-shrink-0 opacity-50 group-hover:opacity-100 group-hover:text-accent-foreground transition-colors" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[300px] p-0 bg-popover" align="start">
