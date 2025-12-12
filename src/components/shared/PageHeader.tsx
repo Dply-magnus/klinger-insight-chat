@@ -83,14 +83,14 @@ export function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
         {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="gap-2">
-                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="w-4 h-4 text-primary" />
-                </div>
-                <span className="hidden md:inline text-sm truncate max-w-[150px]">
-                  {user.email}
-                </span>
-              </Button>
+        <Button variant="ghost" size="sm" className="gap-2 group">
+          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
+            <User className="w-4 h-4 text-primary group-hover:text-white transition-colors" />
+          </div>
+          <span className="hidden md:inline text-sm truncate max-w-[150px]">
+            {user.email}
+          </span>
+        </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
