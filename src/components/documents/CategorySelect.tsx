@@ -68,10 +68,10 @@ export function CategorySelect({
               "w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors",
               !value
                 ? "bg-accent text-accent-foreground"
-                : "hover:bg-muted"
+                : "hover:bg-accent hover:text-accent-foreground"
             )}
           >
-            <span className={cn(!value ? "text-white" : "text-muted-foreground")}>Ingen kategori</span>
+            <span className="text-inherit">Ingen kategori</span>
           </button>
 
           {/* Existing categories */}
