@@ -182,7 +182,7 @@ export default function Documents() {
       const newCategory = doc.category === oldPath 
         ? newPath 
         : doc.category!.replace(oldPath, newPath);
-      await updateCategory.mutateAsync({ documentId: doc.id, category: newCategory });
+      await updateCategory.mutateAsync({ documentId: doc.id, category: newCategory, userId: user!.id });
     }
 
     // Also update stored categories in database
@@ -205,7 +205,7 @@ export default function Documents() {
     });
 
     for (const doc of docsToUpdate) {
-      await updateCategory.mutateAsync({ documentId: doc.id, category: '' });
+      await updateCategory.mutateAsync({ documentId: doc.id, category: '', userId: user!.id });
     }
 
     // Remove from database
@@ -327,8 +327,9 @@ export default function Documents() {
   };
 
   const handleDocumentCategoryChange = async (docId: string, category: string | undefined) => {
+    if (!user) return;
     try {
-      await updateCategory.mutateAsync({ documentId: docId, category: category || '' });
+      await updateCategory.mutateAsync({ documentId: docId, category: category || '', userId: user.id });
       toast({ title: "Kategori uppdaterad" });
     } catch {
       toast({ title: "Kunde inte uppdatera kategori", variant: "destructive" });
