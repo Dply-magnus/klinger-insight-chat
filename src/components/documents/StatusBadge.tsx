@@ -7,7 +7,7 @@ interface StatusBadgeProps {
   size?: "sm" | "md";
 }
 
-const statusConfig: Record<DocumentStatus, { 
+const statusConfig: Record<string, { 
   label: string; 
   className: string;
   icon: React.ReactNode;
@@ -32,10 +32,21 @@ const statusConfig: Record<DocumentStatus, {
     className: "bg-muted text-muted-foreground border-border",
     icon: <XCircle className="w-3 h-3" />,
   },
+  deleted: {
+    label: "Raderad",
+    className: "bg-red-500/20 text-red-600 border-red-500/30",
+    icon: <XCircle className="w-3 h-3" />,
+  },
+};
+
+const defaultConfig = {
+  label: "Okänd",
+  className: "bg-muted text-muted-foreground border-border",
+  icon: <XCircle className="w-3 h-3" />,
 };
 
 export function StatusBadge({ status, size = "sm" }: StatusBadgeProps) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || defaultConfig;
   
   return (
     <span
