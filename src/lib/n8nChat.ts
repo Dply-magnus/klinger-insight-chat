@@ -1,5 +1,5 @@
 // n8n Webhook URL
-const N8N_WEBHOOK_URL = "https://dplymf.app.n8n.cloud/webhook-test/94327b71-fb12-4e0c-870e-6856af357260";
+const N8N_WEBHOOK_URL = "https://dplymf.app.n8n.cloud/webhook/94327b71-fb12-4e0c-870e-6856af357260";
 
 export interface ChatImage {
   id: string;
