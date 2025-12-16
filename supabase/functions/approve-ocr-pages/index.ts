@@ -6,6 +6,48 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface OCRJsonContent {
+  meta: {
+    filename: string;
+    page_number: number;
+  };
+  page_context: string;
+  legend: Record<string, string>;
+  table: {
+    has_table: boolean;
+    columns: string[];
+    rows: {
+      row_label: string;
+      values: (string | null)[];
+    }[];
+  };
+}
+
+function convertJsonToVectorText(jsonContent: OCRJsonContent): string {
+  const legend = jsonContent.legend || {};
+  let output = jsonContent.page_context || "";
+  
+  if (jsonContent.table?.has_table) {
+    output += "\n\n";
+    const cols = jsonContent.table.columns;
+    
+    for (const row of jsonContent.table.rows) {
+      output += `### ${row.row_label}\n`;
+      
+      row.values.forEach((val, index) => {
+        if (val && val !== "") {
+          const productName = cols[index];
+          const meaning = legend[val] ? ` (${legend[val]})` : "";
+          output += `- ${productName}: ${val}${meaning}\n`;
+        }
+      });
+      output += "\n";
+    }
+  }
+  
+  return output.trim();
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -78,24 +120,38 @@ serve(async (req) => {
       );
     }
 
-    // Send pages to n8n for vectorization
-    console.log(`Sending ${pages.length} pages to n8n webhook`);
+    // Convert JSON content to vector text and send pages to n8n
+    console.log(`Converting and sending ${pages.length} pages to n8n webhook`);
+    
+    const processedPages = pages.map(page => {
+      let vectorText = page.content || "";
+      
+      // Try to parse as JSON and convert
+      try {
+        const jsonContent = JSON.parse(page.content) as OCRJsonContent;
+        vectorText = convertJsonToVectorText(jsonContent);
+        console.log(`Page ${page.id}: Converted JSON to vector text (${vectorText.length} chars)`);
+      } catch {
+        // Content is not JSON, use as-is
+        console.log(`Page ${page.id}: Using plain text content`);
+      }
+      
+      return {
+        id: page.id,
+        filename: page.filename,
+        image_url: page.image_url,
+        content: vectorText,
+        page_number: page.page_number,
+        document_id: page.document_id,
+      };
+    });
     
     const n8nResponse = await fetch(n8nWebhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        pages: pages.map(page => ({
-          id: page.id,
-          filename: page.filename,
-          image_url: page.image_url,
-          content: page.content,
-          page_number: page.page_number,
-          document_id: page.document_id,
-        })),
-      }),
+      body: JSON.stringify({ pages: processedPages }),
     });
 
     if (!n8nResponse.ok) {
