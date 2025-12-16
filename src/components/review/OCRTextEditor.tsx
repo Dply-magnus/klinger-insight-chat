@@ -106,12 +106,15 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
               <label className="text-sm font-medium text-foreground">
                 Tabell ({jsonData.table.columns.length} kolumner, {jsonData.table.rows.length} rader)
               </label>
-              <TableEditor
-                columns={jsonData.table.columns}
-                rows={jsonData.table.rows}
-                legend={jsonData.legend}
-                onChange={handleTableChange}
-              />
+              {/* Constrain width to force overflow and enable scrolling */}
+              <div className="max-w-full overflow-hidden">
+                <TableEditor
+                  columns={jsonData.table.columns}
+                  rows={jsonData.table.rows}
+                  legend={jsonData.legend}
+                  onChange={handleTableChange}
+                />
+              </div>
             </div>
           )}
         </div>
