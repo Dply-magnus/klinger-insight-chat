@@ -1,4 +1,4 @@
-import { Bot, FileText, LogOut, User } from "lucide-react";
+import { Bot, FileText, LogOut, User, ScanText } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,6 +26,7 @@ export function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
   const { user } = useAuth();
   const isChat = location.pathname === "/";
   const isDocuments = location.pathname === "/documents";
+  const isReview = location.pathname === "/review";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -76,6 +77,18 @@ export function PageHeader({ title, subtitle, icon }: PageHeaderProps) {
           >
             <FileText className="w-4 h-4" />
             <span className="hidden sm:inline">Dokument</span>
+          </Link>
+          <Link
+            to="/review"
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+              isReview
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <ScanText className="w-4 h-4" />
+            <span className="hidden sm:inline">Granska</span>
           </Link>
         </nav>
 
