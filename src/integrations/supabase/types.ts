@@ -38,6 +38,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ingest_queue: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          document_id: string | null
+          filename: string | null
+          id: string
+          image_url: string | null
+          page_number: number | null
+          status: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          filename?: string | null
+          id?: string
+          image_url?: string | null
+          page_number?: number | null
+          status?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          filename?: string | null
+          id?: string
+          image_url?: string | null
+          page_number?: number | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ingest_queue_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "klinger_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       klinger_categories: {
         Row: {
           created_at: string
