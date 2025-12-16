@@ -66,13 +66,10 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
 
   const legendEntries = Object.entries(legend);
 
-  const truncateText = (text: string, maxLength: number = 6) => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength) + "...";
-  };
+  // Visar hela kolumnnamn (ingen trunkering)
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 w-full min-w-0">
       {/* Legend */}
       {legendEntries.length > 0 && (
         <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
@@ -112,12 +109,18 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
                 </th>
                 {/* Column headers with popover */}
                 {columns.map((col, colIndex) => (
-                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px]">
+                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px] align-top">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <button className="flex items-center gap-0.5 w-full justify-center text-xs font-medium hover:text-primary transition-colors group">
-                          <span className="truncate">{truncateText(col)}</span>
-                          <Pencil className="h-2.5 w-2.5 opacity-50 group-hover:opacity-100 shrink-0" />
+                        <button
+                          type="button"
+                          aria-label={`Redigera kolumn: ${col}`}
+                          className="relative w-full flex items-center justify-center text-xs font-medium hover:text-primary transition-colors group"
+                        >
+                          <span className="whitespace-nowrap [writing-mode:vertical-rl] [text-orientation:mixed]">
+                            {col}
+                          </span>
+                          <Pencil className="absolute top-1 right-1 h-2.5 w-2.5 opacity-50 group-hover:opacity-100" />
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-56 p-2" align="center">
