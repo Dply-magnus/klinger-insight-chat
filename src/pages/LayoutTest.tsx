@@ -83,20 +83,38 @@ export default function LayoutTest() {
 
     // Update table based on type
     if (type === "columns" && Array.isArray(data)) {
-      // Merge new columns with existing
-      const newColumns = data.map((col: any) => ({
-        group: col.group || "",
-        label: col.label || "",
-      }));
-      parsed.table.columns = [...parsed.table.columns, ...newColumns];
+      // Merge new columns, skip duplicates by group+label
+      data.forEach((col: any) => {
+        const exists = parsed.table.columns.some(
+          c => c.group === (col.group || "") && c.label === (col.label || "")
+        );
+        if (!exists) {
+          parsed.table.columns.push({
+            group: col.group || "",
+            label: col.label || "",
+          });
+        }
+      });
     } else if (type === "rows" && Array.isArray(data)) {
-      // Merge new rows with existing
-      const newRows = data.map((row: any) => ({
-        category: row.category || "",
-        row_label: row.row_label || "",
-        values: row.values || [],
-      }));
-      parsed.table.rows = [...parsed.table.rows, ...newRows];
+      // Merge new rows, update existing or add new
+      data.forEach((row: any) => {
+        const existingIndex = parsed.table.rows.findIndex(
+          r => r.category === (row.category || "") && r.row_label === (row.row_label || "")
+        );
+        if (existingIndex >= 0) {
+          // Update existing row's values if provided
+          if (row.values && row.values.length > 0) {
+            parsed.table.rows[existingIndex].values = row.values;
+          }
+        } else {
+          // Add new row
+          parsed.table.rows.push({
+            category: row.category || "",
+            row_label: row.row_label || "",
+            values: row.values || [],
+          });
+        }
+      });
     } else if (type === "values" && Array.isArray(data)) {
       // Update values in existing rows
       data.forEach((update: any) => {
