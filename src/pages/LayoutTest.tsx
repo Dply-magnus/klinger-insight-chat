@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { OCRImageViewer } from "@/components/review/OCRImageViewer";
@@ -9,9 +9,11 @@ import {
   ResizablePanel,
   ResizableHandle,
 } from "@/components/ui/resizable";
+import { parseOCRContent, stringifyOCRContent, OCRJsonContent } from "@/lib/ocrTypes";
 
 export default function LayoutTest() {
   const [topHeight, setTopHeight] = useState(40);
+  const [editedContent, setEditedContent] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
@@ -31,6 +33,13 @@ export default function LayoutTest() {
       return data;
     },
   });
+
+  // Initialize editedContent when page loads
+  useEffect(() => {
+    if (page?.content) {
+      setEditedContent(page.content);
+    }
+  }, [page?.content]);
 
   const handleMouseDown = useCallback(() => {
     isDragging.current = true;
@@ -52,10 +61,57 @@ export default function LayoutTest() {
     setTopHeight(Math.min(Math.max(newHeight, 20), 80));
   }, []);
 
-  const handleApplyData = (type: string, data: any) => {
+  // Get current table from content
+  const getCurrentTable = useCallback(() => {
+    if (!editedContent) return { columns: [], rows: [] };
+    const parsed = parseOCRContent(editedContent);
+    if (!parsed) return { columns: [], rows: [] };
+    return {
+      columns: parsed.table.columns || [],
+      rows: parsed.table.rows || [],
+    };
+  }, [editedContent]);
+
+  // Apply structured data from AI to the table
+  const handleApplyData = useCallback((type: string, data: any) => {
     console.log("Apply data:", type, data);
-    // TODO: Implementera logik för att applicera strukturerad data på tabellen
-  };
+    
+    if (!editedContent || type === "none") return;
+    
+    const parsed = parseOCRContent(editedContent);
+    if (!parsed) return;
+
+    // Update table based on type
+    if (type === "columns" && Array.isArray(data)) {
+      // Merge new columns with existing
+      const newColumns = data.map((col: any) => ({
+        group: col.group || "",
+        label: col.label || "",
+      }));
+      parsed.table.columns = [...parsed.table.columns, ...newColumns];
+    } else if (type === "rows" && Array.isArray(data)) {
+      // Merge new rows with existing
+      const newRows = data.map((row: any) => ({
+        category: row.category || "",
+        row_label: row.row_label || "",
+        values: row.values || [],
+      }));
+      parsed.table.rows = [...parsed.table.rows, ...newRows];
+    } else if (type === "values" && Array.isArray(data)) {
+      // Update values in existing rows
+      data.forEach((update: any) => {
+        const rowIndex = parsed.table.rows.findIndex(
+          r => r.category === update.category && r.row_label === update.row_label
+        );
+        if (rowIndex >= 0 && update.values) {
+          parsed.table.rows[rowIndex].values = update.values;
+        }
+      });
+    }
+
+    // Update the content
+    setEditedContent(stringifyOCRContent(parsed));
+  }, [editedContent]);
 
   if (isLoading) {
     return (
@@ -110,12 +166,14 @@ export default function LayoutTest() {
               <div className="w-12 h-1 bg-muted-foreground/30 rounded" />
             </div>
 
-            {/* Bottom: Text/Table editor */}
             <div className="flex-1 min-h-0 overflow-auto bg-card/50">
               <OCRTextEditor
-                content={page.content || ""}
+                content={editedContent || ""}
                 pageId={page.id}
-                onSave={(data) => console.log("Save:", data)}
+                onSave={(data) => {
+                  console.log("Save:", data);
+                  setEditedContent(data.content);
+                }}
                 isSaving={false}
               />
             </div>
@@ -130,6 +188,7 @@ export default function LayoutTest() {
           <TableBuilderChat
             imageUrl={page.image_url}
             pageId={page.id}
+            currentTable={getCurrentTable()}
             onApplyData={handleApplyData}
           />
         </ResizablePanel>

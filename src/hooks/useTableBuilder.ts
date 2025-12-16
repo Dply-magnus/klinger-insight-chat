@@ -6,7 +6,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   structuredData?: {
-    type: "columns" | "rows" | "values";
+    type: "columns" | "rows" | "values" | "none";
     data: any;
   };
 }
@@ -33,8 +33,16 @@ export function useTableBuilder({ imageUrl, pageId }: UseTableBuilderProps) {
       content: message,
     };
     
-    setMessages(prev => [...prev, userMessage]);
+    // Build chat history for context
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setIsLoading(true);
+
+    // Convert messages to simple format for n8n
+    const chatHistory = updatedMessages.map(m => ({
+      role: m.role,
+      content: m.content,
+    }));
 
     try {
       const { data, error } = await supabase.functions.invoke('table-builder-agent', {
@@ -42,6 +50,7 @@ export function useTableBuilder({ imageUrl, pageId }: UseTableBuilderProps) {
           sessionId,
           image_url: imageUrl,
           message,
+          chat_history: chatHistory,
           current_table: currentTable || { columns: [], rows: [] },
         },
       });
@@ -70,7 +79,7 @@ export function useTableBuilder({ imageUrl, pageId }: UseTableBuilderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [imageUrl, sessionId]);
+  }, [imageUrl, sessionId, messages]);
 
   const clearMessages = useCallback(() => {
     setMessages([]);
