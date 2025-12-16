@@ -38,7 +38,13 @@ serve(async (req) => {
       throw new Error(`n8n webhook failed: ${response.status}`);
     }
 
-    const result = await response.json();
+    let result = await response.json();
+    
+    // n8n kan returnera antingen ett objekt eller en array - hantera båda
+    if (Array.isArray(result)) {
+      result = result[0] || { response: "Tomt svar från agenten", structured_data: { type: "none", data: [] } };
+    }
+    
     console.log('n8n response received:', { hasResponse: !!result.response, hasStructuredData: !!result.structured_data });
 
     return new Response(
