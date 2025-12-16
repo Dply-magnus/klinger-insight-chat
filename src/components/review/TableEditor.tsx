@@ -64,7 +64,7 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
     onChange(columns, rows.filter((_, i) => i !== index));
   };
 
-  const legendEntries = Object.entries(legend);
+  const legendEntries = Object.entries(legend || {});
 
   // Visar hela kolumnnamn (ingen trunkering)
 
