@@ -60,9 +60,9 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
   }
 
   return (
-    <div className="flex flex-col h-full w-full min-w-0 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-2 border-b border-border/50 bg-card/50 gap-2">
+    <div className="w-full">
+      {/* Header - sticky */}
+      <div className="flex items-center justify-between p-2 border-b border-border/50 bg-card/50 gap-2 sticky top-0 z-10">
         <span className="text-sm font-medium text-foreground whitespace-nowrap">
           OCR-data (Sida {jsonData.meta.page_number})
         </span>
@@ -82,43 +82,41 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
         </Button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
-        <div className="p-4 space-y-6">
-          {/* Page Context */}
-          <div className="space-y-2">
+      {/* Content - no internal scroll, parent handles it */}
+      <div className="p-4 space-y-6">
+        {/* Page Context */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">
+            Sidkontext (rubriker, löptext)
+          </label>
+          <Textarea
+            value={jsonData.page_context}
+            onChange={(e) => handlePageContextChange(e.target.value)}
+            className="min-h-[100px] resize-y font-mono text-sm bg-background/50 border-border/50 whitespace-pre-wrap break-words overflow-wrap-anywhere"
+            style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+            placeholder="Ingen kontext..."
+          />
+        </div>
+
+        {/* Table */}
+        {jsonData.table.has_table && (
+          <div className="space-y-2 overflow-hidden w-full min-w-0">
             <label className="text-sm font-medium text-foreground">
-              Sidkontext (rubriker, löptext)
+              Tabell ({jsonData.table.columns.length} kolumner, {jsonData.table.rows.length} rader)
             </label>
-            <Textarea
-              value={jsonData.page_context}
-              onChange={(e) => handlePageContextChange(e.target.value)}
-              className="min-h-[100px] resize-y font-mono text-sm bg-background/50 border-border/50 whitespace-pre-wrap break-words overflow-wrap-anywhere"
-              style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
-              placeholder="Ingen kontext..."
+            <TableEditor
+              columns={jsonData.table.columns}
+              rows={jsonData.table.rows}
+              legend={jsonData.legend}
+              onChange={handleTableChange}
             />
           </div>
-
-          {/* Table */}
-          {jsonData.table.has_table && (
-            <div className="space-y-2 overflow-hidden w-full min-w-0">
-              <label className="text-sm font-medium text-foreground">
-                Tabell ({jsonData.table.columns.length} kolumner, {jsonData.table.rows.length} rader)
-              </label>
-              <TableEditor
-                columns={jsonData.table.columns}
-                rows={jsonData.table.rows}
-                legend={jsonData.legend}
-                onChange={handleTableChange}
-              />
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Status indicator */}
+      {/* Status indicator - sticky bottom */}
       {hasChanges && (
-        <div className="px-4 py-2 border-t border-border/50">
+        <div className="px-4 py-2 border-t border-border/50 bg-card/50 sticky bottom-0">
           <p className="text-xs text-amber-500">Osparade ändringar</p>
         </div>
       )}
