@@ -97,14 +97,14 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
           <table 
             className="border-collapse"
             style={{ 
-              width: `${180 + columns.length * 60 + 40}px`,
-              minWidth: `${180 + columns.length * 60 + 40}px`
+              width: `${280 + columns.length * 60 + 40}px`,
+              minWidth: `${280 + columns.length * 60 + 40}px`
             }}
           >
             <thead>
               <tr>
                 {/* Sticky corner cell */}
-                <th className="sticky left-0 z-20 bg-card border-r border-b border-border/50 p-2 min-w-[180px] w-[180px]">
+                <th className="sticky left-0 z-20 bg-card border-r border-b border-border/50 p-2 min-w-[280px] w-[280px]">
                   <span className="text-xs text-muted-foreground">Rad / Kolumn</span>
                 </th>
                 {/* Column headers with popover */}
@@ -168,8 +168,8 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
             <tbody>
               {rows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  {/* Sticky row label - full width, no truncation */}
-                  <td className="sticky left-0 z-10 bg-card border-r border-b border-border/50 p-1 min-w-[180px] w-[180px]">
+                  {/* Sticky row label - wider to show full text */}
+                  <td className="sticky left-0 z-10 bg-card border-r border-b border-border/50 p-1 min-w-[280px] w-[280px]">
                     <div className="flex items-center gap-1">
                       <Input
                         value={row.row_label}
