@@ -109,7 +109,7 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
                 </th>
                 {/* Column headers with popover */}
                 {columns.map((col, colIndex) => (
-                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px] h-[120px] align-bottom overflow-hidden">
+                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px] h-[180px] align-bottom overflow-hidden">
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
@@ -118,7 +118,7 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
                           className="relative w-full h-full flex items-end justify-center text-xs font-medium hover:text-primary transition-colors group"
                         >
                           <span 
-                            className="whitespace-nowrap [writing-mode:vertical-lr] rotate-180 max-h-[110px] overflow-hidden text-ellipsis"
+                            className="whitespace-nowrap [writing-mode:vertical-lr] rotate-180 max-h-[170px] overflow-hidden text-ellipsis"
                           >
                             {col}
                           </span>
