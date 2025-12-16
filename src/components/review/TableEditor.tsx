@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Plus, Trash2, Pencil } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface TableEditorProps {
   columns: string[];
@@ -66,8 +66,13 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
 
   const legendEntries = Object.entries(legend);
 
+  const truncateText = (text: string, maxLength: number = 6) => {
+    if (text.length <= maxLength) return text;
+    return text.slice(0, maxLength) + "...";
+  };
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 max-w-full">
       {/* Legend */}
       {legendEntries.length > 0 && (
         <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
@@ -84,104 +89,118 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
       )}
 
       {/* Table */}
-      <ScrollArea className="w-full">
-        <div className="min-w-max">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {/* Empty corner cell */}
-                <th className="sticky left-0 z-10 bg-card border border-border/50 p-1 min-w-[150px]">
-                  <span className="text-xs text-muted-foreground">Rad / Kolumn</span>
+      <div className="w-full overflow-x-auto">
+        <table className="border-collapse">
+          <thead>
+            <tr>
+              {/* Empty corner cell */}
+              <th className="sticky left-0 z-10 bg-card border border-border/50 p-1 min-w-[120px] max-w-[150px]">
+                <span className="text-xs text-muted-foreground">Rad / Kolumn</span>
+              </th>
+              {/* Column headers with popover */}
+              {columns.map((col, colIndex) => (
+                <th key={colIndex} className="border border-border/50 p-1 w-[50px] min-w-[50px]">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="flex items-center gap-0.5 w-full justify-center text-xs font-medium hover:text-primary transition-colors group">
+                        <span className="truncate max-w-[35px]">{truncateText(col)}</span>
+                        <Pencil className="h-2.5 w-2.5 opacity-50 group-hover:opacity-100 shrink-0" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-2" align="center">
+                      <div className="flex flex-col gap-2">
+                        <Input
+                          value={col}
+                          onChange={(e) => handleColumnChange(colIndex, e.target.value)}
+                          className="h-8 text-sm"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 justify-start gap-1"
+                          onClick={() => removeColumn(colIndex)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Ta bort kolumn
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </th>
-                {/* Column headers */}
-                {columns.map((col, colIndex) => (
-                  <th key={colIndex} className="border border-border/50 p-1 min-w-[80px]">
-                    <div className="flex items-center gap-1">
-                      <Input
-                        value={col}
-                        onChange={(e) => handleColumnChange(colIndex, e.target.value)}
-                        className="h-7 text-xs font-medium bg-background/50 border-0 p-1"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeColumn(colIndex)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </th>
-                ))}
-                {/* Add column button */}
-                <th className="border border-border/50 p-1 w-10">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-primary"
-                    onClick={addColumn}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {/* Row label */}
-                  <td className="sticky left-0 z-10 bg-card border border-border/50 p-1">
-                    <div className="flex items-center gap-1">
-                      <Input
-                        value={row.row_label}
-                        onChange={(e) => handleRowLabelChange(rowIndex, e.target.value)}
-                        className="h-7 text-xs font-medium bg-background/50 border-0 p-1"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
-                        onClick={() => removeRow(rowIndex)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </td>
-                  {/* Cell values */}
-                  {row.values.map((value, colIndex) => (
-                    <td key={colIndex} className="border border-border/50 p-1">
-                      <Input
-                        value={value || ""}
-                        onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
-                        className="h-7 text-xs text-center font-mono bg-background/50 border-0 p-1"
-                        placeholder="-"
-                      />
-                    </td>
-                  ))}
-                  {/* Empty cell for alignment */}
-                  <td className="border border-border/50 p-1 w-10"></td>
-                </tr>
               ))}
-              {/* Add row button */}
-              <tr>
+              {/* Add column button */}
+              <th className="border border-border/50 p-1 w-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 text-muted-foreground hover:text-primary"
+                  onClick={addColumn}
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {/* Row label */}
                 <td className="sticky left-0 z-10 bg-card border border-border/50 p-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 w-full text-xs text-muted-foreground hover:text-primary gap-1"
-                    onClick={addRow}
-                  >
-                    <Plus className="h-3 w-3" />
-                    Lägg till rad
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      value={row.row_label}
+                      onChange={(e) => handleRowLabelChange(rowIndex, e.target.value)}
+                      className="h-7 text-xs font-medium bg-background/50 border-0 p-1 min-w-0"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeRow(rowIndex)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </td>
-                <td colSpan={columns.length + 1} className="border border-border/50"></td>
+                {/* Cell values */}
+                {row.values.map((value, colIndex) => (
+                  <td key={colIndex} className="border border-border/50 p-1 w-[50px]">
+                    <Input
+                      value={value || ""}
+                      onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
+                      className="h-7 w-full text-xs text-center font-mono bg-background/50 border-0 p-0.5"
+                      placeholder="-"
+                    />
+                  </td>
+                ))}
+                {/* Empty cell for alignment */}
+                <td className="border border-border/50 p-1 w-8"></td>
               </tr>
-            </tbody>
-          </table>
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+            ))}
+            {/* Add row button */}
+            <tr>
+              <td className="sticky left-0 z-10 bg-card border border-border/50 p-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-full text-xs text-muted-foreground hover:text-primary gap-1"
+                  onClick={addRow}
+                >
+                  <Plus className="h-3 w-3" />
+                  Lägg till rad
+                </Button>
+              </td>
+              <td colSpan={columns.length + 1} className="border border-border/50"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
