@@ -1,26 +1,87 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TableColumn, TableRow } from "@/lib/ocrTypes";
 
 interface TableEditorProps {
-  columns: string[];
-  rows: { row_label: string; values: (string | null)[] }[];
+  columns: TableColumn[];
+  rows: TableRow[];
   legend: Record<string, string>;
-  onChange: (columns: string[], rows: { row_label: string; values: (string | null)[] }[]) => void;
+  onChange: (columns: TableColumn[], rows: TableRow[]) => void;
 }
 
 export function TableEditor({ columns, rows, legend, onChange }: TableEditorProps) {
-  const handleColumnChange = (index: number, value: string) => {
+  // Group columns by their group header
+  const columnGroups = useMemo(() => {
+    const groups: { group: string | null; startIndex: number; count: number }[] = [];
+    let currentGroup: string | null = null;
+    let startIndex = 0;
+    
+    columns.forEach((col, index) => {
+      if (col.group !== currentGroup) {
+        if (index > 0) {
+          groups.push({ group: currentGroup, startIndex, count: index - startIndex });
+        }
+        currentGroup = col.group;
+        startIndex = index;
+      }
+    });
+    
+    // Add the last group
+    if (columns.length > 0) {
+      groups.push({ group: currentGroup, startIndex, count: columns.length - startIndex });
+    }
+    
+    return groups;
+  }, [columns]);
+
+  // Group rows by category
+  const rowGroups = useMemo(() => {
+    const groups: { category: string; startIndex: number; count: number }[] = [];
+    let currentCategory = "";
+    let startIndex = 0;
+    
+    rows.forEach((row, index) => {
+      if (row.category !== currentCategory) {
+        if (index > 0) {
+          groups.push({ category: currentCategory, startIndex, count: index - startIndex });
+        }
+        currentCategory = row.category;
+        startIndex = index;
+      }
+    });
+    
+    // Add the last group
+    if (rows.length > 0) {
+      groups.push({ category: currentCategory, startIndex, count: rows.length - startIndex });
+    }
+    
+    return groups;
+  }, [rows]);
+
+  const handleColumnLabelChange = (index: number, value: string) => {
     const newColumns = [...columns];
-    newColumns[index] = value;
+    newColumns[index] = { ...newColumns[index], label: value };
+    onChange(newColumns, rows);
+  };
+
+  const handleColumnGroupChange = (index: number, value: string) => {
+    const newColumns = [...columns];
+    newColumns[index] = { ...newColumns[index], group: value || null };
     onChange(newColumns, rows);
   };
 
   const handleRowLabelChange = (rowIndex: number, value: string) => {
     const newRows = [...rows];
     newRows[rowIndex] = { ...newRows[rowIndex], row_label: value };
+    onChange(columns, newRows);
+  };
+
+  const handleRowCategoryChange = (rowIndex: number, value: string) => {
+    const newRows = [...rows];
+    newRows[rowIndex] = { ...newRows[rowIndex], category: value };
     onChange(columns, newRows);
   };
 
@@ -33,12 +94,13 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
   };
 
   const addColumn = () => {
-    const newColumns = [...columns, `Kolumn ${columns.length + 1}`];
+    const lastGroup = columns.length > 0 ? columns[columns.length - 1].group : null;
+    const newColumn: TableColumn = { group: lastGroup, label: `Kolumn ${columns.length + 1}` };
     const newRows = rows.map(row => ({
       ...row,
       values: [...row.values, null]
     }));
-    onChange(newColumns, newRows);
+    onChange([...columns, newColumn], newRows);
   };
 
   const removeColumn = (index: number) => {
@@ -52,7 +114,9 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
   };
 
   const addRow = () => {
-    const newRow = {
+    const lastCategory = rows.length > 0 ? rows[rows.length - 1].category : "";
+    const newRow: TableRow = {
+      category: lastCategory,
       row_label: `Rad ${rows.length + 1}`,
       values: columns.map(() => null)
     };
@@ -66,7 +130,21 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
 
   const legendEntries = Object.entries(legend || {});
 
-  // Visar hela kolumnnamn (ingen trunkering)
+  // Check if first row in its category
+  const isFirstInCategory = (rowIndex: number): boolean => {
+    if (rowIndex === 0) return true;
+    return rows[rowIndex].category !== rows[rowIndex - 1].category;
+  };
+
+  // Count rows in same category starting from this row
+  const getCategoryRowCount = (rowIndex: number): number => {
+    const category = rows[rowIndex].category;
+    let count = 0;
+    for (let i = rowIndex; i < rows.length && rows[i].category === category; i++) {
+      count++;
+    }
+    return count;
+  };
 
   return (
     <div className="flex flex-col gap-3 w-full min-w-0">
@@ -88,7 +166,7 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
       {/* Table with sticky first column and horizontal scroll */}
       <div className="relative border border-border/50 rounded-lg w-full overflow-hidden">
         <div 
-          className="overflow-x-auto overflow-y-auto max-h-[400px]"
+          className="overflow-x-auto overflow-y-auto max-h-[500px]"
           style={{ 
             scrollbarWidth: 'thin',
             scrollbarColor: 'hsl(var(--muted-foreground) / 0.5) hsl(var(--muted) / 0.3)'
@@ -97,47 +175,72 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
           <table 
             className="border-collapse"
             style={{ 
-              width: `${280 + columns.length * 60 + 40}px`,
-              minWidth: `${280 + columns.length * 60 + 40}px`
+              width: `${100 + 180 + columns.length * 60 + 40}px`,
+              minWidth: `${100 + 180 + columns.length * 60 + 40}px`
             }}
           >
             <thead>
+              {/* Group header row */}
               <tr>
-                {/* Sticky corner cell */}
-                <th className="sticky left-0 z-20 bg-card border-r border-b border-border/50 p-2 min-w-[280px] w-[280px]">
-                  <span className="text-xs text-muted-foreground">Rad / Kolumn</span>
+                <th className="sticky left-0 z-20 bg-card border-r border-b border-border/50 p-1" colSpan={2}>
+                  <span className="text-xs text-muted-foreground">Grupp</span>
                 </th>
-                {/* Column headers with popover */}
+                {columnGroups.map((group, groupIndex) => (
+                  <th 
+                    key={groupIndex} 
+                    colSpan={group.count}
+                    className="border-b border-r border-border/50 p-2 text-xs font-semibold text-center bg-muted/30"
+                  >
+                    {group.group || "—"}
+                  </th>
+                ))}
+                <th className="border-b border-border/50 p-1 w-10 min-w-[40px]"></th>
+              </tr>
+              {/* Column label row */}
+              <tr>
+                <th className="sticky left-0 z-20 bg-card border-r border-b border-border/50 p-1 min-w-[100px] w-[100px]">
+                  <span className="text-xs text-muted-foreground">Kategori</span>
+                </th>
+                <th className="sticky left-[100px] z-20 bg-card border-r border-b border-border/50 p-1 min-w-[180px] w-[180px]">
+                  <span className="text-xs text-muted-foreground">Rad</span>
+                </th>
                 {columns.map((col, colIndex) => (
                   <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px] h-[180px] align-bottom overflow-hidden">
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
                           type="button"
-                          aria-label={`Redigera kolumn: ${col}`}
+                          aria-label={`Redigera kolumn: ${col.label}`}
                           className="relative w-full h-full flex items-end justify-center text-xs font-medium hover:text-primary transition-colors group"
                         >
                           <span 
                             className="whitespace-nowrap [writing-mode:vertical-lr] rotate-180 max-h-[170px] overflow-hidden text-ellipsis"
                           >
-                            {col}
+                            {col.label}
                           </span>
                           <Pencil className="absolute top-1 right-0 h-2.5 w-2.5 opacity-50 group-hover:opacity-100" />
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-56 p-2" align="center">
-                        <div className="flex flex-col gap-2">
-                          <Input
-                            value={col}
-                            onChange={(e) => handleColumnChange(colIndex, e.target.value)}
-                            className="h-8 text-sm"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                (e.target as HTMLInputElement).blur();
-                              }
-                            }}
-                          />
+                      <PopoverContent className="w-64 p-3" align="center">
+                        <div className="flex flex-col gap-3">
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Gruppnamn</label>
+                            <Input
+                              value={col.group || ""}
+                              onChange={(e) => handleColumnGroupChange(colIndex, e.target.value)}
+                              className="h-8 text-sm"
+                              placeholder="(ingen grupp)"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground mb-1 block">Kolumnnamn</label>
+                            <Input
+                              value={col.label}
+                              onChange={(e) => handleColumnLabelChange(colIndex, e.target.value)}
+                              className="h-8 text-sm"
+                              autoFocus
+                            />
+                          </div>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -168,8 +271,36 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
             <tbody>
               {rows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  {/* Sticky row label - wider to show full text */}
-                  <td className="sticky left-0 z-10 bg-card border-r border-b border-border/50 p-1 min-w-[280px] w-[280px]">
+                  {/* Category cell - only show for first row in category */}
+                  {isFirstInCategory(rowIndex) && (
+                    <td 
+                      className="sticky left-0 z-10 bg-muted/20 border-r border-b border-border/50 p-1 min-w-[100px] w-[100px] align-top"
+                      rowSpan={getCategoryRowCount(rowIndex)}
+                    >
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <button
+                            type="button"
+                            className="text-xs font-semibold text-left w-full hover:text-primary transition-colors group p-1"
+                          >
+                            {row.category || "—"}
+                            <Pencil className="inline-block ml-1 h-2.5 w-2.5 opacity-50 group-hover:opacity-100" />
+                          </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-48 p-2" align="start">
+                          <Input
+                            value={row.category}
+                            onChange={(e) => handleRowCategoryChange(rowIndex, e.target.value)}
+                            className="h-8 text-sm"
+                            placeholder="Kategori..."
+                            autoFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </td>
+                  )}
+                  {/* Row label */}
+                  <td className="sticky left-[100px] z-10 bg-card border-r border-b border-border/50 p-1 min-w-[180px] w-[180px]">
                     <div className="flex items-center gap-1">
                       <Input
                         value={row.row_label}
@@ -203,7 +334,7 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
               ))}
               {/* Add row button */}
               <tr>
-                <td className="sticky left-0 z-10 bg-card border-r border-border/50 p-1">
+                <td className="sticky left-0 z-10 bg-card border-r border-border/50 p-1" colSpan={2}>
                   <Button
                     variant="ghost"
                     size="sm"

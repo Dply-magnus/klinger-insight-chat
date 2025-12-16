@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Save, Loader2 } from "lucide-react";
 import { TableEditor } from "./TableEditor";
-import { OCRJsonContent, parseOCRContent, stringifyOCRContent } from "@/lib/ocrTypes";
+import { OCRJsonContent, TableColumn, TableRow, parseOCRContent, stringifyOCRContent } from "@/lib/ocrTypes";
 
 interface OCRTextEditorProps {
   content: string | null;
@@ -29,8 +29,8 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
   };
 
   const handleTableChange = (
-    columns: string[],
-    rows: { row_label: string; values: (string | null)[] }[]
+    columns: TableColumn[],
+    rows: TableRow[]
   ) => {
     if (!jsonData) return;
     setJsonData({
