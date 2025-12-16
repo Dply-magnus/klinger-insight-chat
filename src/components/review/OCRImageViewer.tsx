@@ -16,16 +16,16 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
 
   if (!imageUrl) {
     return (
-      <div className="flex items-center justify-center h-full bg-muted/20 rounded-lg">
+      <div className="flex items-center justify-center h-32 bg-muted/20 rounded-lg">
         <p className="text-muted-foreground">Ingen bild tillgänglig</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* Zoom controls */}
-      <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-card/50">
+    <div>
+      {/* Zoom controls - sticky */}
+      <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-card/50 sticky top-0 z-10">
         <Button
           variant="ghost"
           size="sm"
@@ -62,22 +62,20 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
         )}
       </div>
 
-      {/* Image container with scroll */}
-      <div className="flex-1 min-h-0 overflow-auto bg-muted/10">
-        <div className="p-4 min-w-max">
-          <img
-            src={imageUrl}
-            alt={filename || "OCR-bild"}
-            loading="lazy"
-            decoding="async"
-            className="rounded shadow-lg"
-            style={{
-              width: `${zoom * 100}%`,
-              maxWidth: "none",
-              height: "auto",
-            }}
-          />
-        </div>
+      {/* Image - no internal scroll, parent handles it */}
+      <div className="p-4">
+        <img
+          src={imageUrl}
+          alt={filename || "OCR-bild"}
+          loading="lazy"
+          decoding="async"
+          className="rounded shadow-lg"
+          style={{
+            width: `${zoom * 100}%`,
+            maxWidth: "none",
+            height: "auto",
+          }}
+        />
       </div>
     </div>
   );
