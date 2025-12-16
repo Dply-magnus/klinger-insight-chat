@@ -1,10 +1,25 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Columns, Rows3, Grid3X3, Loader2 } from "lucide-react";
 import { useTableBuilder } from "@/hooks/useTableBuilder";
 import { cn } from "@/lib/utils";
+
+// Simple markdown parser for lists and bold
+function parseMarkdown(text: string): string {
+  return text
+    // Bold **text**
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Numbered lists: 1) or 1.
+    .replace(/^(\d+)[\.\)]\s+(.+)$/gm, '<li>$2</li>')
+    // Bullet lists: - or *
+    .replace(/^[\-\*]\s+(.+)$/gm, '<li>$1</li>')
+    // Wrap consecutive <li> in <ul>
+    .replace(/(<li>.*<\/li>\n?)+/g, '<ul class="list-disc pl-4 space-y-1">$&</ul>')
+    // Line breaks
+    .replace(/\n/g, '<br/>');
+}
 
 interface TableBuilderChatProps {
   imageUrl: string | null;
@@ -93,7 +108,10 @@ export function TableBuilderChat({
                     : "bg-muted mr-8"
                 )}
               >
-                <p className="whitespace-pre-wrap">{msg.content}</p>
+                <div 
+                  className="prose prose-sm prose-invert max-w-none"
+                  dangerouslySetInnerHTML={{ __html: parseMarkdown(msg.content) }}
+                />
                 
                 {/* Only show apply button when agent explicitly sets show_apply: true */}
                 {msg.structuredData && 
