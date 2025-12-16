@@ -89,12 +89,10 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
       )}
 
       {/* Table with sticky first column and horizontal scroll */}
-      <div className="relative border border-border/50 rounded-lg overflow-hidden">
+      <div className="relative border border-border/50 rounded-lg w-full overflow-hidden">
         <div 
-          className="max-h-[400px]"
+          className="overflow-x-auto overflow-y-auto max-h-[400px]"
           style={{ 
-            overflowX: 'scroll',
-            overflowY: 'auto',
             scrollbarWidth: 'thin',
             scrollbarColor: 'hsl(var(--muted-foreground) / 0.5) hsl(var(--muted) / 0.3)'
           }}

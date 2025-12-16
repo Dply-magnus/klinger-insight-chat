@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Save, Loader2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { TableEditor } from "./TableEditor";
 import { OCRJsonContent, parseOCRContent, stringifyOCRContent } from "@/lib/ocrTypes";
 
@@ -84,7 +83,7 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-6">
           {/* Page Context */}
           <div className="space-y-2">
@@ -102,23 +101,20 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
 
           {/* Table */}
           {jsonData.table.has_table && (
-            <div className="space-y-2">
+            <div className="space-y-2 overflow-hidden">
               <label className="text-sm font-medium text-foreground">
                 Tabell ({jsonData.table.columns.length} kolumner, {jsonData.table.rows.length} rader)
               </label>
-              {/* Constrain width to force overflow and enable scrolling */}
-              <div className="max-w-full overflow-hidden">
-                <TableEditor
-                  columns={jsonData.table.columns}
-                  rows={jsonData.table.rows}
-                  legend={jsonData.legend}
-                  onChange={handleTableChange}
-                />
-              </div>
+              <TableEditor
+                columns={jsonData.table.columns}
+                rows={jsonData.table.rows}
+                legend={jsonData.legend}
+                onChange={handleTableChange}
+              />
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Status indicator */}
       {hasChanges && (
