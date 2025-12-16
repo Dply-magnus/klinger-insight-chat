@@ -94,7 +94,8 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
             <Textarea
               value={jsonData.page_context}
               onChange={(e) => handlePageContextChange(e.target.value)}
-              className="min-h-[100px] resize-none font-mono text-sm bg-background/50 border-border/50"
+              className="min-h-[100px] resize-y font-mono text-sm bg-background/50 border-border/50 whitespace-pre-wrap break-words overflow-wrap-anywhere"
+              style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
               placeholder="Ingen kontext..."
             />
           </div>
