@@ -23,6 +23,7 @@ export default function LayoutTest() {
         .from("ingest_queue")
         .select("*")
         .eq("status", "pending")
+        .eq("page_number", 2)
         .limit(1)
         .maybeSingle();
 
