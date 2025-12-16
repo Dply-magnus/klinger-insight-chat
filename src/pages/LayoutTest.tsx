@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback } from "react";
+import { OCRImageViewer } from "@/components/review/OCRImageViewer";
+import { OCRTextEditor } from "@/components/review/OCRTextEditor";
 
 export default function LayoutTest() {
-  const [topHeight, setTopHeight] = useState(40); // percentage
+  const [topHeight, setTopHeight] = useState(40);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
 
@@ -25,6 +27,21 @@ export default function LayoutTest() {
     setTopHeight(Math.min(Math.max(newHeight, 20), 80));
   }, []);
 
+  // Mock data for testing
+  const mockContent = JSON.stringify({
+    meta: { page_number: 1 },
+    page_context: "Detta är testkontext som kan redigeras. Här kan du skriva fri text om sidan.",
+    table: {
+      has_table: true,
+      columns: Array.from({ length: 15 }, (_, i) => `Kolumn ${i + 1}`),
+      rows: Array.from({ length: 20 }, (_, i) => ({
+        row_label: `Rad ${i + 1}`,
+        values: Array.from({ length: 15 }, (_, j) => `R${i + 1}K${j + 1}`)
+      }))
+    },
+    legend: null
+  });
+
   return (
     <div 
       className="h-screen flex flex-col bg-background"
@@ -47,16 +64,10 @@ export default function LayoutTest() {
           className="overflow-auto bg-muted/20"
           style={{ height: `${topHeight}%` }}
         >
-          <div className="p-4">
-            <p className="mb-2 text-sm text-muted-foreground">Övre panel - scrollbar bör synas:</p>
-            {/* Large placeholder to test scrolling */}
-            <div 
-              className="bg-primary/20 border-2 border-dashed border-primary/50 rounded flex items-center justify-center"
-              style={{ width: "1200px", height: "800px" }}
-            >
-              <span className="text-lg">Stor bild-placeholder (1200x800px)</span>
-            </div>
-          </div>
+          <OCRImageViewer 
+            imageUrl="https://via.placeholder.com/1200x800" 
+            filename="test-bild.png" 
+          />
         </div>
 
         {/* Resize handle */}
@@ -69,53 +80,12 @@ export default function LayoutTest() {
 
         {/* Bottom panel (text) */}
         <div className="flex-1 min-h-0 overflow-auto bg-card/50">
-          <div className="p-4 space-y-4">
-            <p className="text-sm text-muted-foreground">Nedre panel - scrollbar bör synas:</p>
-            
-            {/* Sidkontext textarea */}
-            <div>
-              <label className="text-sm font-medium mb-1 block">Sidkontext</label>
-              <textarea 
-                className="w-full h-32 p-2 border border-border rounded bg-background resize-none"
-                defaultValue="Detta är sidkontext-texten som kan redigeras..."
-              />
-            </div>
-
-            {/* Large table placeholder */}
-            <div>
-              <label className="text-sm font-medium mb-1 block">Tabell</label>
-              <div 
-                className="bg-secondary/30 border-2 border-dashed border-secondary rounded"
-                style={{ width: "1000px", height: "600px" }}
-              >
-                <div className="p-4">
-                  <p>Stor tabell-placeholder (1000x600px)</p>
-                  <table className="mt-4 border-collapse">
-                    <thead>
-                      <tr>
-                        {Array.from({ length: 15 }, (_, i) => (
-                          <th key={i} className="border border-border p-2 bg-muted">
-                            Kolumn {i + 1}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Array.from({ length: 20 }, (_, rowIdx) => (
-                        <tr key={rowIdx}>
-                          {Array.from({ length: 15 }, (_, colIdx) => (
-                            <td key={colIdx} className="border border-border p-2">
-                              R{rowIdx + 1}K{colIdx + 1}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
+          <OCRTextEditor
+            content={mockContent}
+            pageId="test-page"
+            onSave={(data) => console.log("Save:", data)}
+            isSaving={false}
+          />
         </div>
       </div>
     </div>
