@@ -95,7 +95,11 @@ export function TableBuilderChat({
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
                 
-                {msg.structuredData && msg.structuredData.type !== "none" && onApplyData && (
+                {/* Only show apply button when agent explicitly sets show_apply: true */}
+                {msg.structuredData && 
+                 msg.structuredData.type !== "none" && 
+                 msg.structuredData.show_apply === true && 
+                 onApplyData && (
                   <Button
                     size="sm"
                     className="mt-2"

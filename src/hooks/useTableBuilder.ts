@@ -8,6 +8,7 @@ interface Message {
   structuredData?: {
     type: "columns" | "rows" | "values" | "none";
     data: any;
+    show_apply?: boolean;
   };
 }
 
