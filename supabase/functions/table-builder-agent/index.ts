@@ -12,9 +12,9 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId, image_url, message, current_table } = await req.json();
+    const { sessionId, image_url, message, chat_history, current_table } = await req.json();
 
-    console.log('Table builder request:', { sessionId, message, hasImage: !!image_url });
+    console.log('Table builder request:', { sessionId, message, hasImage: !!image_url, historyLength: chat_history?.length || 0 });
 
     const webhookUrl = Deno.env.get('N8N_TABLE_BUILDER_WEBHOOK_URL');
     if (!webhookUrl) {
@@ -27,7 +27,8 @@ serve(async (req) => {
       body: JSON.stringify({ 
         sessionId, 
         image_url, 
-        message, 
+        message,
+        chat_history: chat_history || [],
         current_table: current_table || { columns: [], rows: [] }
       }),
     });

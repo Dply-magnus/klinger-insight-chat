@@ -95,7 +95,7 @@ export function TableBuilderChat({
               >
                 <p className="whitespace-pre-wrap">{msg.content}</p>
                 
-                {msg.structuredData && onApplyData && (
+                {msg.structuredData && msg.structuredData.type !== "none" && onApplyData && (
                   <Button
                     size="sm"
                     className="mt-2"
