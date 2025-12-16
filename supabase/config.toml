@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.approve-ocr-pages]
 verify_jwt = true
+
+[functions.table-builder-agent]
+verify_jwt = false

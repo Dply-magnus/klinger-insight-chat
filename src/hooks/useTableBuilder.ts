@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -14,8 +15,6 @@ interface UseTableBuilderProps {
   imageUrl: string | null;
   pageId: string;
 }
-
-const WEBHOOK_URL = "https://dplymf.app.n8n.cloud/webhook/696f54ba-6bbb-4bae-9646-d85e6435a683";
 
 export function useTableBuilder({ imageUrl, pageId }: UseTableBuilderProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,24 +37,18 @@ export function useTableBuilder({ imageUrl, pageId }: UseTableBuilderProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('table-builder-agent', {
+        body: {
           sessionId,
           image_url: imageUrl,
           message,
           current_table: currentTable || { columns: [], rows: [] },
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+      if (error) {
+        throw new Error(error.message);
       }
-
-      const data = await response.json();
       
       const assistantMessage: Message = {
         id: `assistant-${Date.now()}`,
