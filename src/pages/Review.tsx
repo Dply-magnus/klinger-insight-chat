@@ -104,8 +104,15 @@ export default function Review() {
               </TabsContent>
             </Tabs>
           ) : (
-            <ResizablePanelGroup direction="horizontal" className="flex-1">
-              <ResizablePanel defaultSize={50} minSize={30}>
+            <ResizablePanelGroup direction="vertical" className="flex-1">
+              <ResizablePanel defaultSize={40} minSize={20} maxSize={60}>
+                <OCRImageViewer
+                  imageUrl={currentPage?.image_url || null}
+                  filename={currentPage?.filename || null}
+                />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={60} minSize={30}>
                 {currentPage && (
                   <OCRTextEditor
                     content={currentPage.content}
@@ -114,13 +121,6 @@ export default function Review() {
                     isSaving={isUpdating}
                   />
                 )}
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={50} minSize={30}>
-                <OCRImageViewer
-                  imageUrl={currentPage?.image_url || null}
-                  filename={currentPage?.filename || null}
-                />
               </ResizablePanel>
             </ResizablePanelGroup>
           )}
