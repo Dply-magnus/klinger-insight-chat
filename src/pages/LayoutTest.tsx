@@ -17,7 +17,7 @@ export default function LayoutTest() {
         .from("ingest_queue")
         .select("*")
         .eq("status", "pending")
-        .order("created_at", { ascending: true })
+        .eq("page_number", 2)
         .limit(1)
         .maybeSingle();
 
