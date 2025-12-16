@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface OCRImageViewerProps {
   imageUrl: string | null;
@@ -62,20 +63,22 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
         )}
       </div>
 
-      {/* Image container */}
-      <div className="flex-1 overflow-auto p-4 bg-muted/10">
-        <div 
-          className="flex items-start justify-center min-h-full"
-          style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}
-        >
+      {/* Image container with scroll */}
+      <ScrollArea className="flex-1 bg-muted/10">
+        <div className="p-4">
           <img
             src={imageUrl}
             alt={filename || "OCR-bild"}
-            className="max-w-full h-auto rounded shadow-lg"
-            style={{ maxHeight: zoom === 1 ? '100%' : 'none' }}
+            className="rounded shadow-lg"
+            style={{ 
+              width: `${zoom * 100}%`,
+              maxWidth: 'none',
+              height: 'auto'
+            }}
           />
         </div>
-      </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </div>
   );
 }
