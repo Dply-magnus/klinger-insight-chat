@@ -1,14 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Save, Loader2, ChevronDown, ChevronUp } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Save, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TableEditor } from "./TableEditor";
+import { OCRJsonContent, parseOCRContent, stringifyOCRContent } from "@/lib/ocrTypes";
 
 interface OCRTextEditorProps {
   content: string | null;
@@ -17,64 +13,48 @@ interface OCRTextEditorProps {
   isSaving: boolean;
 }
 
-interface TextSection {
-  id: string;
-  content: string;
-  preview: string;
-}
-
 export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEditorProps) {
-  const [sections, setSections] = useState<TextSection[]>([]);
-  const [openSections, setOpenSections] = useState<string[]>([]);
+  const [jsonData, setJsonData] = useState<OCRJsonContent | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Parse content into sections (split by double newlines = paragraphs)
   useEffect(() => {
-    const text = content || "";
-    const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0);
-    
-    const newSections = paragraphs.map((p, index) => ({
-      id: `section-${index}`,
-      content: p.trim(),
-      preview: p.trim().substring(0, 60) + (p.trim().length > 60 ? "..." : ""),
-    }));
-    
-    setSections(newSections);
-    setOpenSections([]);
+    const parsed = parseOCRContent(content);
+    setJsonData(parsed);
     setHasChanges(false);
   }, [content, pageId]);
 
-  const handleSectionChange = (sectionId: string, newContent: string) => {
-    setSections(prev => prev.map(s => 
-      s.id === sectionId 
-        ? { ...s, content: newContent, preview: newContent.substring(0, 60) + (newContent.length > 60 ? "..." : "") }
-        : s
-    ));
+  const handlePageContextChange = (value: string) => {
+    if (!jsonData) return;
+    setJsonData({ ...jsonData, page_context: value });
+    setHasChanges(true);
+  };
+
+  const handleTableChange = (
+    columns: string[],
+    rows: { row_label: string; values: (string | null)[] }[]
+  ) => {
+    if (!jsonData) return;
+    setJsonData({
+      ...jsonData,
+      table: { ...jsonData.table, columns, rows }
+    });
     setHasChanges(true);
   };
 
   const handleSave = () => {
-    const fullContent = sections.map(s => s.content).join("\n\n");
-    onSave({ id: pageId, content: fullContent });
+    if (!jsonData) return;
+    onSave({ id: pageId, content: stringifyOCRContent(jsonData) });
     setHasChanges(false);
   };
 
-  const handleExpandAll = () => {
-    setOpenSections(sections.map(s => s.id));
-  };
-
-  const handleCollapseAll = () => {
-    setOpenSections([]);
-  };
-
-  if (sections.length === 0) {
+  if (!jsonData) {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-2 border-b border-border/50 bg-card/50">
-          <span className="text-sm font-medium text-foreground">OCR-text</span>
+          <span className="text-sm font-medium text-foreground">OCR-data</span>
         </div>
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Ingen OCR-text tillgänglig</p>
+          <p className="text-muted-foreground">Ingen OCR-data tillgänglig</p>
         </div>
       </div>
     );
@@ -85,75 +65,54 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
       {/* Header */}
       <div className="flex items-center justify-between p-2 border-b border-border/50 bg-card/50 gap-2">
         <span className="text-sm font-medium text-foreground whitespace-nowrap">
-          OCR-text ({sections.length} stycken)
+          OCR-data (Sida {jsonData.meta.page_number})
         </span>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleExpandAll}
-            className="gap-1 text-xs h-7"
-          >
-            <ChevronDown className="h-3 w-3" />
-            Alla
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleCollapseAll}
-            className="gap-1 text-xs h-7"
-          >
-            <ChevronUp className="h-3 w-3" />
-            Stäng
-          </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-            className="gap-2"
-          >
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Spara
-          </Button>
-        </div>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={handleSave}
+          disabled={!hasChanges || isSaving}
+          className="gap-2"
+        >
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          Spara
+        </Button>
       </div>
 
-      {/* Accordion sections */}
+      {/* Content */}
       <ScrollArea className="flex-1">
-        <div className="p-2">
-          <Accordion
-            type="multiple"
-            value={openSections}
-            onValueChange={setOpenSections}
-            className="space-y-2"
-          >
-            {sections.map((section, index) => (
-              <AccordionItem
-                key={section.id}
-                value={section.id}
-                className="border border-border/50 rounded-lg bg-card/30 overflow-hidden"
-              >
-                <AccordionTrigger className="px-3 py-2 hover:no-underline hover:bg-muted/30 text-left">
-                  <span className="text-sm font-mono text-muted-foreground truncate pr-2">
-                    <span className="text-primary font-medium mr-2">§{index + 1}</span>
-                    {section.preview}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="px-3 pb-3">
-                  <Textarea
-                    value={section.content}
-                    onChange={(e) => handleSectionChange(section.id, e.target.value)}
-                    className="min-h-[120px] resize-none font-mono text-sm bg-background/50 border-border/50"
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+        <div className="p-4 space-y-6">
+          {/* Page Context */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">
+              Sidkontext (rubriker, löptext)
+            </label>
+            <Textarea
+              value={jsonData.page_context}
+              onChange={(e) => handlePageContextChange(e.target.value)}
+              className="min-h-[100px] resize-none font-mono text-sm bg-background/50 border-border/50"
+              placeholder="Ingen kontext..."
+            />
+          </div>
+
+          {/* Table */}
+          {jsonData.table.has_table && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Tabell ({jsonData.table.columns.length} kolumner, {jsonData.table.rows.length} rader)
+              </label>
+              <TableEditor
+                columns={jsonData.table.columns}
+                rows={jsonData.table.rows}
+                legend={jsonData.legend}
+                onChange={handleTableChange}
+              />
+            </div>
+          )}
         </div>
       </ScrollArea>
 
