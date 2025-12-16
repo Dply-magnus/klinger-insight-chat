@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.document-processed]
 verify_jwt = false
+
+[functions.approve-ocr-pages]
+verify_jwt = true
