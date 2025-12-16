@@ -81,17 +81,11 @@ export default function Review() {
 
           {/* Main content area */}
           {isMobile ? (
-            <Tabs defaultValue="image" className="flex-1 flex flex-col">
+            <Tabs defaultValue="text" className="flex-1 flex flex-col">
               <TabsList className="mx-4 mt-2">
-                <TabsTrigger value="image" className="flex-1">Bild</TabsTrigger>
                 <TabsTrigger value="text" className="flex-1">Text</TabsTrigger>
+                <TabsTrigger value="image" className="flex-1">Bild</TabsTrigger>
               </TabsList>
-              <TabsContent value="image" className="flex-1 m-0 p-2">
-                <OCRImageViewer
-                  imageUrl={currentPage?.image_url || null}
-                  filename={currentPage?.filename || null}
-                />
-              </TabsContent>
               <TabsContent value="text" className="flex-1 m-0 p-2">
                 {currentPage && (
                   <OCRTextEditor
@@ -102,16 +96,15 @@ export default function Review() {
                   />
                 )}
               </TabsContent>
-            </Tabs>
-          ) : (
-            <ResizablePanelGroup direction="horizontal" className="flex-1">
-              <ResizablePanel defaultSize={50} minSize={30}>
+              <TabsContent value="image" className="flex-1 m-0 p-2">
                 <OCRImageViewer
                   imageUrl={currentPage?.image_url || null}
                   filename={currentPage?.filename || null}
                 />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <ResizablePanelGroup direction="horizontal" className="flex-1">
               <ResizablePanel defaultSize={50} minSize={30}>
                 {currentPage && (
                   <OCRTextEditor
@@ -121,6 +114,13 @@ export default function Review() {
                     isSaving={isUpdating}
                   />
                 )}
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <OCRImageViewer
+                  imageUrl={currentPage?.image_url || null}
+                  filename={currentPage?.filename || null}
+                />
               </ResizablePanel>
             </ResizablePanelGroup>
           )}
