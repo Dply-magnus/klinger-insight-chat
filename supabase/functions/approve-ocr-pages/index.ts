@@ -6,6 +6,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface TableColumn {
+  group: string | null;
+  label: string;
+}
+
+interface TableRow {
+  category: string;
+  row_label: string;
+  values: (string | null)[];
+}
+
 interface OCRJsonContent {
   meta: {
     filename: string;
@@ -15,11 +26,8 @@ interface OCRJsonContent {
   legend: Record<string, string>;
   table: {
     has_table: boolean;
-    columns: string[];
-    rows: {
-      row_label: string;
-      values: (string | null)[];
-    }[];
+    columns: TableColumn[];
+    rows: TableRow[];
   };
 }
 
@@ -31,12 +39,22 @@ function convertJsonToVectorText(jsonContent: OCRJsonContent): string {
     output += "\n\n";
     const cols = jsonContent.table.columns;
     
+    // Group rows by category
+    let currentCategory = "";
+    
     for (const row of jsonContent.table.rows) {
+      // Add category header if changed
+      if (row.category && row.category !== currentCategory) {
+        currentCategory = row.category;
+        output += `## ${currentCategory}\n\n`;
+      }
+      
       output += `### ${row.row_label}\n`;
       
       row.values.forEach((val, index) => {
         if (val && val !== "") {
-          const productName = cols[index];
+          const col = cols[index];
+          const productName = col.group ? `${col.group} - ${col.label}` : col.label;
           const meaning = legend[val] ? ` (${legend[val]})` : "";
           output += `- ${productName}: ${val}${meaning}\n`;
         }

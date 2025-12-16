@@ -1,3 +1,14 @@
+export interface TableColumn {
+  group: string | null;
+  label: string;
+}
+
+export interface TableRow {
+  category: string;
+  row_label: string;
+  values: (string | null)[];
+}
+
 export interface OCRJsonContent {
   meta: {
     filename: string;
@@ -7,11 +18,8 @@ export interface OCRJsonContent {
   legend: Record<string, string>;
   table: {
     has_table: boolean;
-    columns: string[];
-    rows: {
-      row_label: string;
-      values: (string | null)[];
-    }[];
+    columns: TableColumn[];
+    rows: TableRow[];
   };
 }
 
