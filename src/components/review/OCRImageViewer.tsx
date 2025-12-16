@@ -64,8 +64,9 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
       </div>
 
       {/* Image container with scroll */}
-      <div className="flex-1 overflow-auto bg-muted/10">
-        <div className="p-4 min-w-max">
+      <div className="flex-1 relative min-h-0">
+        <div className="absolute inset-0 overflow-auto bg-muted/10">
+          <div className="p-4 min-w-max">
           <img
             src={imageUrl}
             alt={filename || "OCR-bild"}
@@ -76,6 +77,7 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
               height: 'auto'
             }}
           />
+          </div>
         </div>
       </div>
     </div>
