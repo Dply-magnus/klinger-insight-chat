@@ -72,7 +72,7 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
   };
 
   return (
-    <div className="flex flex-col gap-3 max-w-full">
+    <div className="flex flex-col gap-3">
       {/* Legend */}
       {legendEntries.length > 0 && (
         <div className="p-3 bg-muted/30 rounded-lg border border-border/50">
@@ -88,118 +88,126 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
         </div>
       )}
 
-      {/* Table */}
-      <div className="w-full overflow-x-auto">
-        <table className="border-collapse">
-          <thead>
-            <tr>
-              {/* Empty corner cell */}
-              <th className="sticky left-0 z-10 bg-card border border-border/50 p-1 min-w-[120px] max-w-[150px]">
-                <span className="text-xs text-muted-foreground">Rad / Kolumn</span>
-              </th>
-              {/* Column headers with popover */}
-              {columns.map((col, colIndex) => (
-                <th key={colIndex} className="border border-border/50 p-1 w-[50px] min-w-[50px]">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="flex items-center gap-0.5 w-full justify-center text-xs font-medium hover:text-primary transition-colors group">
-                        <span className="truncate max-w-[35px]">{truncateText(col)}</span>
-                        <Pencil className="h-2.5 w-2.5 opacity-50 group-hover:opacity-100 shrink-0" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56 p-2" align="center">
-                      <div className="flex flex-col gap-2">
-                        <Input
-                          value={col}
-                          onChange={(e) => handleColumnChange(colIndex, e.target.value)}
-                          className="h-8 text-sm"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              (e.target as HTMLInputElement).blur();
-                            }
-                          }}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 justify-start gap-1"
-                          onClick={() => removeColumn(colIndex)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          Ta bort kolumn
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+      {/* Table with sticky first column and horizontal scroll */}
+      <div className="relative border border-border/50 rounded-lg">
+        <div 
+          className="overflow-x-scroll overflow-y-auto max-h-[400px] scrollbar-visible"
+          style={{ minWidth: 0 }}
+        >
+          <table 
+            className="border-collapse"
+            style={{ minWidth: `${180 + columns.length * 60 + 40}px` }}
+          >
+            <thead>
+              <tr>
+                {/* Sticky corner cell */}
+                <th className="sticky left-0 z-20 bg-card border-r border-b border-border/50 p-2 min-w-[180px] w-[180px]">
+                  <span className="text-xs text-muted-foreground">Rad / Kolumn</span>
                 </th>
-              ))}
-              {/* Add column button */}
-              <th className="border border-border/50 p-1 w-8">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 text-muted-foreground hover:text-primary"
-                  onClick={addColumn}
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
-                {/* Row label */}
-                <td className="sticky left-0 z-10 bg-card border border-border/50 p-1">
-                  <div className="flex items-center gap-1">
-                    <Input
-                      value={row.row_label}
-                      onChange={(e) => handleRowLabelChange(rowIndex, e.target.value)}
-                      className="h-7 text-xs font-medium bg-background/50 border-0 p-1 min-w-0"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
-                      onClick={() => removeRow(rowIndex)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </td>
-                {/* Cell values */}
-                {row.values.map((value, colIndex) => (
-                  <td key={colIndex} className="border border-border/50 p-1 w-[50px]">
-                    <Input
-                      value={value || ""}
-                      onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
-                      className="h-7 w-full text-xs text-center font-mono bg-background/50 border-0 p-0.5"
-                      placeholder="-"
-                    />
-                  </td>
+                {/* Column headers with popover */}
+                {columns.map((col, colIndex) => (
+                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px]">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="flex items-center gap-0.5 w-full justify-center text-xs font-medium hover:text-primary transition-colors group">
+                          <span className="truncate">{truncateText(col)}</span>
+                          <Pencil className="h-2.5 w-2.5 opacity-50 group-hover:opacity-100 shrink-0" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56 p-2" align="center">
+                        <div className="flex flex-col gap-2">
+                          <Input
+                            value={col}
+                            onChange={(e) => handleColumnChange(colIndex, e.target.value)}
+                            className="h-8 text-sm"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 justify-start gap-1"
+                            onClick={() => removeColumn(colIndex)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            Ta bort kolumn
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </th>
                 ))}
-                {/* Empty cell for alignment */}
-                <td className="border border-border/50 p-1 w-8"></td>
+                {/* Add column button */}
+                <th className="border-b border-border/50 p-1 w-10 min-w-[40px]">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-primary"
+                    onClick={addColumn}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </th>
               </tr>
-            ))}
-            {/* Add row button */}
-            <tr>
-              <td className="sticky left-0 z-10 bg-card border border-border/50 p-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-full text-xs text-muted-foreground hover:text-primary gap-1"
-                  onClick={addRow}
-                >
-                  <Plus className="h-3 w-3" />
-                  Lägg till rad
-                </Button>
-              </td>
-              <td colSpan={columns.length + 1} className="border border-border/50"></td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {/* Sticky row label - full width, no truncation */}
+                  <td className="sticky left-0 z-10 bg-card border-r border-b border-border/50 p-1 min-w-[180px] w-[180px]">
+                    <div className="flex items-center gap-1">
+                      <Input
+                        value={row.row_label}
+                        onChange={(e) => handleRowLabelChange(rowIndex, e.target.value)}
+                        className="h-7 text-xs font-medium bg-background/50 border-0 p-1 flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeRow(rowIndex)}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </td>
+                  {/* Cell values */}
+                  {row.values.map((value, colIndex) => (
+                    <td key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px]">
+                      <Input
+                        value={value || ""}
+                        onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
+                        className="h-7 w-full text-xs text-center font-mono bg-background/50 border-0 p-0.5"
+                        placeholder="-"
+                      />
+                    </td>
+                  ))}
+                  {/* Empty cell for alignment */}
+                  <td className="border-b border-border/50 p-1 w-10"></td>
+                </tr>
+              ))}
+              {/* Add row button */}
+              <tr>
+                <td className="sticky left-0 z-10 bg-card border-r border-border/50 p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 w-full text-xs text-muted-foreground hover:text-primary gap-1"
+                    onClick={addRow}
+                  >
+                    <Plus className="h-3 w-3" />
+                    Lägg till rad
+                  </Button>
+                </td>
+                <td colSpan={columns.length + 1} className="border-border/50"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
