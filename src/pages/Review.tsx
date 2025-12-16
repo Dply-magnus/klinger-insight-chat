@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { useIngestQueue } from "@/hooks/useIngestQueue";
 import { OCRImageViewer } from "@/components/review/OCRImageViewer";
 import { OCRTextEditor } from "@/components/review/OCRTextEditor";
 import { PageNavigation } from "@/components/review/PageNavigation";
 import { Button } from "@/components/ui/button";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { Send, Loader2, FileText } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,7 +21,29 @@ export default function Review() {
   } = useIngestQueue();
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [topHeight, setTopHeight] = useState(40);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
   const isMobile = useIsMobile();
+
+  const handleMouseDown = useCallback(() => {
+    isDragging.current = true;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+  }, []);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging.current || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const newHeight = ((e.clientY - rect.top) / rect.height) * 100;
+    setTopHeight(Math.min(Math.max(newHeight, 20), 80));
+  }, []);
 
   const currentPage = pendingPages[currentIndex];
 
@@ -104,15 +125,34 @@ export default function Review() {
               </TabsContent>
             </Tabs>
           ) : (
-            <ResizablePanelGroup direction="vertical" className="flex-1">
-              <ResizablePanel defaultSize={40} minSize={20} maxSize={60}>
+            <div 
+              ref={containerRef}
+              className="flex-1 flex flex-col min-h-0"
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+            >
+              {/* Övre panel (bild) */}
+              <div 
+                className="overflow-auto bg-muted/20 shrink-0"
+                style={{ height: `${topHeight}%` }}
+              >
                 <OCRImageViewer
                   imageUrl={currentPage?.image_url || null}
                   filename={currentPage?.filename || null}
                 />
-              </ResizablePanel>
-              <ResizableHandle withHandle />
-              <ResizablePanel defaultSize={60} minSize={30}>
+              </div>
+
+              {/* Resize handle */}
+              <div 
+                className="h-2 bg-border hover:bg-primary/50 cursor-row-resize shrink-0 flex items-center justify-center transition-colors"
+                onMouseDown={handleMouseDown}
+              >
+                <div className="w-12 h-1 bg-muted-foreground/30 rounded" />
+              </div>
+
+              {/* Nedre panel (text) */}
+              <div className="flex-1 min-h-0 overflow-auto bg-card/50">
                 {currentPage && (
                   <OCRTextEditor
                     content={currentPage.content}
@@ -121,8 +161,8 @@ export default function Review() {
                     isSaving={isUpdating}
                   />
                 )}
-              </ResizablePanel>
-            </ResizablePanelGroup>
+              </div>
+            </div>
           )}
 
           {/* Approve button */}
