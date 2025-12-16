@@ -60,7 +60,7 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full w-full min-w-0 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between p-2 border-b border-border/50 bg-card/50 gap-2">
         <span className="text-sm font-medium text-foreground whitespace-nowrap">
@@ -83,7 +83,7 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
         <div className="p-4 space-y-6">
           {/* Page Context */}
           <div className="space-y-2">
@@ -101,7 +101,7 @@ export function OCRTextEditor({ content, pageId, onSave, isSaving }: OCRTextEdit
 
           {/* Table */}
           {jsonData.table.has_table && (
-            <div className="space-y-2 overflow-hidden">
+            <div className="space-y-2 overflow-hidden w-full min-w-0">
               <label className="text-sm font-medium text-foreground">
                 Tabell ({jsonData.table.columns.length} kolumner, {jsonData.table.rows.length} rader)
               </label>
