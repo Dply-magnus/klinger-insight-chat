@@ -109,21 +109,20 @@ export function TableEditor({ columns, rows, legend, onChange }: TableEditorProp
                 </th>
                 {/* Column headers with popover */}
                 {columns.map((col, colIndex) => (
-                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px] h-[120px] align-bottom">
+                  <th key={colIndex} className="border-b border-r border-border/50 p-1 w-[60px] min-w-[60px] h-[120px] align-bottom overflow-hidden">
                     <Popover>
                       <PopoverTrigger asChild>
                         <button
                           type="button"
                           aria-label={`Redigera kolumn: ${col}`}
-                          className="relative w-full h-full flex items-end justify-center text-xs font-medium hover:text-primary transition-colors group pb-1"
+                          className="relative w-full h-full flex items-end justify-center text-xs font-medium hover:text-primary transition-colors group"
                         >
                           <span 
-                            className="whitespace-nowrap origin-bottom-left"
-                            style={{ transform: 'rotate(-90deg) translateX(-100%)' }}
+                            className="whitespace-nowrap [writing-mode:vertical-lr] rotate-180 max-h-[110px] overflow-hidden text-ellipsis"
                           >
                             {col}
                           </span>
-                          <Pencil className="absolute bottom-1 right-1 h-2.5 w-2.5 opacity-50 group-hover:opacity-100" />
+                          <Pencil className="absolute top-1 right-0 h-2.5 w-2.5 opacity-50 group-hover:opacity-100" />
                         </button>
                       </PopoverTrigger>
                       <PopoverContent className="w-56 p-2" align="center">
