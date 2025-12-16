@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface OCRImageViewerProps {
   imageUrl: string | null;
@@ -11,8 +10,8 @@ interface OCRImageViewerProps {
 export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
   const [zoom, setZoom] = useState(1);
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.25, 3));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5));
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.25, 3));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.25, 0.5));
   const handleReset = () => setZoom(1);
 
   if (!imageUrl) {
@@ -24,7 +23,7 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Zoom controls */}
       <div className="flex items-center gap-2 p-2 border-b border-border/50 bg-card/50">
         <Button
@@ -64,20 +63,20 @@ export function OCRImageViewer({ imageUrl, filename }: OCRImageViewerProps) {
       </div>
 
       {/* Image container with scroll */}
-      <div className="flex-1 relative min-h-0">
-        <div className="absolute inset-0 overflow-auto bg-muted/10">
-          <div className="p-4 min-w-max">
+      <div className="flex-1 min-h-0 overflow-auto bg-muted/10">
+        <div className="p-4 min-w-max">
           <img
             src={imageUrl}
             alt={filename || "OCR-bild"}
+            loading="lazy"
+            decoding="async"
             className="rounded shadow-lg"
-            style={{ 
+            style={{
               width: `${zoom * 100}%`,
-              maxWidth: 'none',
-              height: 'auto'
+              maxWidth: "none",
+              height: "auto",
             }}
           />
-          </div>
         </div>
       </div>
     </div>
